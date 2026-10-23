@@ -14,8 +14,8 @@ export function parseLeagueId(raw: string | string[] | undefined) {
   return Number(raw);
 }
 
-// The database index only folds ASCII case, so the store checks names here as well.
+// The database index only folds ASCII case, so the store checks names here as well. toLowerCase ignores the device locale.
 export function hasDuplicateName(leagues: { id: number; name: string }[], name: string, exceptId?: number) {
-  const key = name.trim().toLocaleLowerCase();
-  return leagues.some((league) => league.id !== exceptId && league.name.trim().toLocaleLowerCase() === key);
+  const key = name.trim().toLowerCase();
+  return leagues.some((league) => league.id !== exceptId && league.name.trim().toLowerCase() === key);
 }

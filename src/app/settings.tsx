@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { InfoRow } from '@/components/info-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, MaxContentWidth, Spacing, TopTabInset } from '@/constants/theme';
@@ -15,15 +16,6 @@ const OPTIONS: { value: ThemePreference; label: string }[] = [
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
 ];
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <ThemedView type="backgroundElement" style={styles.row}>
-      <ThemedText>{label}</ThemedText>
-      <ThemedText themeColor="textSecondary">{value}</ThemedText>
-    </ThemedView>
-  );
-}
 
 export default function SettingsScreen() {
   const { preference, setPreference } = useThemePreference();
@@ -68,9 +60,9 @@ export default function SettingsScreen() {
 
         <View style={styles.section}>
           <ThemedText type="smallBold">About</ThemedText>
-          <Row label="Storage" value={storage ?? 'checking'} />
-          <Row label="App launches" value={String(launchCount)} />
-          <Row label="Version" value={Constants.expoConfig?.version ?? 'unknown'} />
+          <InfoRow label="Storage" value={storage ?? 'checking'} />
+          <InfoRow label="App launches" value={String(launchCount)} />
+          <InfoRow label="Version" value={Constants.expoConfig?.version ?? 'unknown'} />
         </View>
       </SafeAreaView>
     </ThemedView>

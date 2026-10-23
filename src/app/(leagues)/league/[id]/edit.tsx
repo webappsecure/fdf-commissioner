@@ -1,46 +1,15 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { ActionButton } from '@/components/action-button';
 import { LeagueForm } from '@/components/league-form';
-import { LeagueNotFound } from '@/components/league-not-found';
+import { LeagueLoadGate } from '@/components/league-load-gate';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
-import { updateLeague } from '@/db/leagues';
+import { updateLeague, type League } from '@/db/leagues';
 import { useLeague } from '@/hooks/use-league';
 import { parseLeagueId } from '@/leagues/league-input';
 
-export default function EditLeagueScreen() {
+function EditLeague({ league }: { league: League }) {
   const router = useRouter();
-  const { id: rawId } = useLocalSearchParams<{ id: string }>();
-  const id = parseLeagueId(rawId);
-  const { state } = useLeague(id);
-
-  if (state.status === 'missing') {
-    return (
-      <Screen>
-        <LeagueNotFound />
-      </Screen>
-    );
-  }
-
-  if (state.status === 'loading') {
-    return (
-      <Screen>
-        <ThemedText themeColor="textSecondary">Loading league...</ThemedText>
-      </Screen>
-    );
-  }
-
-  if (state.status === 'error') {
-    return (
-      <Screen>
-        <ThemedText accessibilityRole="alert">The league could not be loaded.</ThemedText>
-        <ActionButton label="Back to leagues" onPress={() => router.replace('/')} />
-      </Screen>
-    );
-  }
-
-  const { league } = state;
 
   // A direct load or reload has no history to go back to.
   function leave() {
@@ -67,5 +36,16 @@ export default function EditLeagueScreen() {
         onCancel={leave}
       />
     </Screen>
+  );
+}
+
+export default function EditLeagueScreen() {
+  const { id: rawId } = useLocalSearchParams<{ id: string }>();
+  const { state, retry } = useLeague(parseLeagueId(rawId));
+
+  return (
+    <LeagueLoadGate state={state} onRetry={retry}>
+      {(league) => <EditLeague league={league} />}
+    </LeagueLoadGate>
   );
 }
