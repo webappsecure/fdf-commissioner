@@ -15,4 +15,12 @@ export const migrations: readonly string[] = [
     manual INTEGER NOT NULL,
     context TEXT
   );`,
+  `CREATE TABLE leagues (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL COLLATE NOCASE UNIQUE,
+    size INTEGER NOT NULL,
+    structure TEXT NOT NULL,
+    weekly_headline_enabled INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL
+  );`,
 ];

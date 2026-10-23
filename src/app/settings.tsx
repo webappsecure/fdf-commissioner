@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { BottomTabInset, MaxContentWidth, Spacing, TopTabInset } from '@/constants/theme';
 import { useLaunchCount } from '@/db/database-provider';
 import { requestStoragePersistence, type StorageStatus } from '@/db/storage-status';
 import { useThemePreference, type ThemePreference } from '@/theme/theme-preference';
@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
     maxWidth: MaxContentWidth,
     gap: Spacing.four,
     padding: Spacing.four,
+    paddingTop: TopTabInset + Spacing.three,
     paddingBottom: BottomTabInset + Spacing.three,
   },
   section: { gap: Spacing.two },
