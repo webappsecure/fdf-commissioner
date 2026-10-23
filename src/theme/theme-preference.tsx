@@ -2,8 +2,9 @@ import { createContext, use, useCallback, useEffect, useMemo, useState, type Rea
 import { useColorScheme as useSystemColorScheme } from 'react-native';
 
 import { getMeta, setMeta } from '@/db/database';
+import { parsePreference, type ThemePreference } from '@/theme/preference';
 
-export type ThemePreference = 'system' | 'light' | 'dark';
+export type { ThemePreference };
 
 type ThemePreferenceValue = {
   preference: ThemePreference;
@@ -18,10 +19,6 @@ const ThemePreferenceContext = createContext<ThemePreferenceValue>({
   scheme: 'light',
   setPreference: () => {},
 });
-
-function parsePreference(value: string | null): ThemePreference {
-  return value === 'light' || value === 'dark' ? value : 'system';
-}
 
 export function ThemePreferenceProvider({ children }: { children: ReactNode }) {
   const systemScheme = useSystemColorScheme();

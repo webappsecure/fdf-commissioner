@@ -98,9 +98,9 @@ of the switch; the skills and `ai-interaction.md` only point back here.
 - Run them via the project's test command (see Commands in `AGENTS.md`), not a
   hardcoded tool name.
 
-Stack binding: no test runner is installed and `AGENTS.md` declares no `test`
-command, so tests are not yet a gate. Run `/tests` to add one (likely Jest with
-`jest-expo`, the Expo-native choice).
+Stack binding: Jest with `jest-expo`, run with `npm test`. Test pure logic (the
+rules engine, parsers, selectors) in plain `*.test.ts` files; mock `expo-sqlite`
+or other native modules rather than importing them into a test.
 
 ## Browser Verification
 

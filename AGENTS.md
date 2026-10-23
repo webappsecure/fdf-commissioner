@@ -325,12 +325,12 @@ Expo (React Native, expo-router) app with TypeScript, npm.
 - Dev server: `npm start` (`expo start`)
 - iOS / Android / Web: `npm run ios`, `npm run android`, `npm run web`
 - Typecheck: `npx tsc --noEmit`
+- Test: `npm test` (Jest with `jest-expo`; `npm run test:watch` to watch)
 - Lint: `npm run lint` (`expo lint`; ESLint is not installed yet, so the first run offers to set it up)
-- Build: none configured. Web export is `npx expo export --platform web`, which the Expo config sets to server output.
+- Build: none configured. Web export is `npx expo export --platform web`, which the Expo config sets to static output (`dist/`).
 
-Testing is opt-in. If this project does not already have a unit test runner, run
-`/tests` or `$tests` to add one and update this section with the real test
-commands.
+Unit tests use Jest with `jest-expo` and live next to source files (`*.test.ts`). They
+cover pure logic; UI and device behavior are checked by hand or in the browser.
 
 Browser testing is also opt-in. Run `/tests browser` or `$tests browser` to add
 or normalize a browser harness and document its exact command as `Browser
