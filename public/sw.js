@@ -42,7 +42,10 @@ async function refresh(request) {
   return response;
 }
 
-// Cache first so a slow or missing connection never delays opening; the network refreshes the copy for next time.
+// Files under these paths have a content hash in their name, so a cached copy never goes stale.
+const IMMUTABLE_PATHS = ['/_expo/static/', '/assets/'];
+
+// Cache first so a slow or missing connection never delays opening; the network refreshes mutable copies for next time.
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
@@ -51,7 +54,10 @@ self.addEventListener('fetch', (event) => {
     (async () => {
       const cached = await caches.match(request, { ignoreSearch: request.mode === 'navigate' });
       if (cached) {
-        event.waitUntil(refresh(request).catch(() => {}));
+        const { pathname } = new URL(request.url);
+        if (!IMMUTABLE_PATHS.some((prefix) => pathname.startsWith(prefix))) {
+          event.waitUntil(refresh(request).catch(() => {}));
+        }
         return withIsolationHeaders(cached);
       }
       return withIsolationHeaders(await refresh(request));

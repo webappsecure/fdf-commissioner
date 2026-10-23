@@ -35,7 +35,13 @@ export function getDatabase() {
     openStage = 'opening database';
     opening = SQLite.openDatabaseAsync(DATABASE_NAME)
       .then(async (db) => {
-        await migrate(db);
+        try {
+          await migrate(db);
+        } catch (error) {
+          // Keep the original error even if closing fails too.
+          await db.closeAsync().catch(() => {});
+          throw error;
+        }
         openStage = 'ready';
         return db;
       })
