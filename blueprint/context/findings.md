@@ -21,20 +21,20 @@
 **Found:** 2026-10-23 by /audit (scope: full; lens: all)
 **Why it matters:** The service worker answers pages from cache first and only refreshes them in the background. After a new build, an old cached page can request lazily loaded route files that the new deployment no longer serves, which returns a 404 and crashes the app ("Requiring unknown module"). This happened once while testing feature 3 and cleared only after the user unregistered the worker and cleared site data. Installed copies would hit this after every update. Root cause is inferred from the matching file names and the fix, not reproduced under a controlled update.
 **Suggested fix:** Serve navigations network-first with the cache as the offline fallback so a new page always loads with its matching files; keep hashed assets cache-first. Recheck offline launch and the update flow in a built copy.
-**Resolution:** `public/sw.js` now loads pages network-first (3 second timeout, cache as fallback when offline, slow, or not ok); other files keep cache-first. Needs the built-copy update and offline check.
+**Resolution:** `public/sw.js` now loads pages network-first (3 second timeout, cache as fallback when offline, slow, or not ok); other files keep cache-first. Needs the built-copy update and offline check. Re-reviewed 2026-10-23: the stale-page crash is addressed (pages load network-first), but the repair introduced a new defect, F-26, so this stays `fixed` until F-26 is repaired and re-reviewed.
 
-### F-24 [P3] fixed - Duplicate-name check depends on the device locale
+### F-26 [P2] fixed - Network-first page loads fail on a slow connection when the page is not cached
 
-**File:** src/leagues/league-input.ts:19
+**File:** public/sw.js:62
 **Found:** 2026-10-23 by /audit (scope: full; lens: all)
-**Why it matters:** `toLocaleLowerCase()` uses the device locale, so on a Turkish-locale device "I" lowercases to a dotless "ı" and "INDIA" and "india" are no longer seen as the same name. The same two names then compare differently on different devices.
-**Suggested fix:** Use `toLowerCase()`, which does not depend on locale, and add a test. No requirement is lost.
-**Resolution:** `hasDuplicateName` uses `toLowerCase()`; a test mocks `toLocaleLowerCase` to prove the result no longer depends on it.
+**Why it matters:** `loadPage` gives up on the network after 3 seconds and, with no cached copy of that page, returns `Response.error()`. A page that was never cached (first visit to a route, or after the cache was trimmed or cleared while the worker stays installed) then fails to load on a slow but working connection, where the network would have answered. The same path also returns an error offline for any uncached route, although `/` is cached and the client router could serve it. Found by reading the code; not reproduced.
+**Suggested fix:** Apply the timeout only when a cached copy exists to fall back to, otherwise wait for the network; offline with no exact match, fall back to the cached `/` page. Then recheck the update and offline flows in a built copy.
+**Resolution:** `loadPage` looks up the cached page first: with a copy it keeps the 3 second timeout, without one it waits for the network, and offline with no copy it serves the cached `/` shell. Needs the built-copy slow-network and offline checks.
 
-### F-25 [P3] fixed - League home and edit screens repeat their load-state rendering
+### F-27 [P3] fixed - The locale test cannot fail
 
-**File:** src/app/(leagues)/league/[id]/index.tsx:51
+**File:** src/leagues/league-input.test.ts:53
 **Found:** 2026-10-23 by /audit (scope: full; lens: all)
-**Why it matters:** The missing, loading, and error blocks are copied between the home and edit screens (the error block differs only by one button), and the same label and value `Row` is defined in both the league home and `settings.tsx`. The next league screens (feature 4 onward) will copy them again.
-**Suggested fix:** Render the three states in one small component that takes the `useLeague` state and an optional retry, and share `Row` from `src/components`. Do it when a third screen needs it or alongside the next league screen.
-**Resolution:** `InfoRow` and `LeagueLoadGate` are shared by the league home, edit, and Settings screens.
+**Why it matters:** The test mocks `toLocaleLowerCase` to return one fixed string for every input. If `hasDuplicateName` went back to `toLocaleLowerCase()`, both names would map to that string and the test would still pass, so it proves nothing about the locale fix.
+**Suggested fix:** Make the mock return a different value on each call, so any use of `toLocaleLowerCase` makes the two names compare unequal and the test fails, or assert against `toLowerCase` being called. No requirement is lost.
+**Resolution:** The test now spies on `toLocaleLowerCase` and asserts it is never called; switching the code back to `toLocaleLowerCase()` made it fail, then the change was reverted.

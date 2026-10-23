@@ -50,9 +50,13 @@ describe('hasDuplicateName', () => {
   });
 
   it('does not depend on the device locale', () => {
-    const upper = jest.spyOn(String.prototype, 'toLocaleLowerCase').mockImplementation(() => 'locale-dependent');
-    expect(hasDuplicateName([{ id: 1, name: 'INDIA' }], 'india')).toBe(true);
-    upper.mockRestore();
+    const spy = jest.spyOn(String.prototype, 'toLocaleLowerCase');
+    try {
+      expect(hasDuplicateName([{ id: 1, name: 'INDIA' }], 'india')).toBe(true);
+      expect(spy).not.toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it('skips the league being renamed', () => {

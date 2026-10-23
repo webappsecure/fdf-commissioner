@@ -64,11 +64,13 @@ function fetchWithin(request, ms) {
   });
 }
 
-// A cached page can outlive the lazily loaded files of its build, so pages try the network first and use the cache offline or when the network is slow.
+// A cached page can outlive the lazily loaded files of its build, so pages try the network first.
+// A cached copy is used offline or when the network is slow; with no copy to fall back on the network gets all the time it needs.
 async function loadPage(request) {
+  const cached = await caches.match(request, { ignoreSearch: true });
   let networkResponse = null;
   try {
-    networkResponse = await fetchWithin(request, NAVIGATION_TIMEOUT_MS);
+    networkResponse = cached ? await fetchWithin(request, NAVIGATION_TIMEOUT_MS) : await fetch(request);
     if (networkResponse.ok) {
       const cache = await caches.open(CACHE);
       await cache.put(request, networkResponse.clone());
@@ -76,11 +78,13 @@ async function loadPage(request) {
       return withIsolationHeaders(networkResponse);
     }
   } catch {
-    // fall through to the cached copy
+    // fall through to a cached copy
   }
-  const cached = await caches.match(request, { ignoreSearch: true });
   if (cached) return withIsolationHeaders(cached);
-  return networkResponse ? withIsolationHeaders(networkResponse) : Response.error();
+  if (networkResponse) return withIsolationHeaders(networkResponse);
+  // Offline on a page that was never cached: the app shell can show it through the client router.
+  const shell = await caches.match(SCOPE_PATH, { ignoreSearch: true });
+  return shell ? withIsolationHeaders(shell) : Response.error();
 }
 
 // Other files are cache first so a slow or missing connection never delays opening; the network refreshes mutable copies for next time.
