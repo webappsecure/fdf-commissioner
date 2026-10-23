@@ -43,7 +43,9 @@ async function refresh(request) {
 }
 
 // Files under these paths have a content hash in their name, so a cached copy never goes stale.
-const IMMUTABLE_PATHS = ['/_expo/static/', '/assets/'];
+// Prefixed with the worker's scope so a subpath host such as /fdf-commissioner/ still matches.
+const SCOPE_PATH = new URL(self.registration.scope).pathname;
+const IMMUTABLE_PATHS = ['_expo/static/', 'assets/'].map((path) => SCOPE_PATH + path);
 
 // Cache first so a slow or missing connection never delays opening; the network refreshes mutable copies for next time.
 self.addEventListener('fetch', (event) => {
