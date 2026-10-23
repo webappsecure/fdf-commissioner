@@ -1,4 +1,5 @@
 const CACHE = 'fdf-commissioner-v1';
+const MAX_ENTRIES = 300;
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -25,23 +26,35 @@ function withIsolationHeaders(response) {
   });
 }
 
+// Cache.put replaces an existing entry by removing it and appending, so the oldest keys are the stalest.
+async function trim(cache) {
+  const keys = await cache.keys();
+  await Promise.all(keys.slice(0, Math.max(0, keys.length - MAX_ENTRIES)).map((key) => cache.delete(key)));
+}
+
+async function refresh(request) {
+  const response = await fetch(request);
+  if (response.ok) {
+    const cache = await caches.open(CACHE);
+    await cache.put(request, response.clone());
+    await trim(cache);
+  }
+  return response;
+}
+
+// Cache first so a slow or missing connection never delays opening; the network refreshes the copy for next time.
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
 
   event.respondWith(
-    fetch(request)
-      .then(async (response) => {
-        if (response.ok) {
-          const cache = await caches.open(CACHE);
-          await cache.put(request, response.clone());
-        }
-        return withIsolationHeaders(response);
-      })
-      .catch(async () => {
-        const cached = await caches.match(request, { ignoreSearch: true });
-        if (cached) return withIsolationHeaders(cached);
-        throw new Error('offline and not cached');
-      }),
+    (async () => {
+      const cached = await caches.match(request, { ignoreSearch: request.mode === 'navigate' });
+      if (cached) {
+        event.waitUntil(refresh(request).catch(() => {}));
+        return withIsolationHeaders(cached);
+      }
+      return withIsolationHeaders(await refresh(request));
+    })(),
   );
 });

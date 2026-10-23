@@ -23,7 +23,8 @@ const ThemePreferenceContext = createContext<ThemePreferenceValue>({
 export function ThemePreferenceProvider({ children }: { children: ReactNode }) {
   const systemScheme = useSystemColorScheme();
   const [preference, setPreferenceState] = useState<ThemePreference>('system');
-  const [hydrated, setHydrated] = useState(false);
+  // Static web rendering has no device scheme, so only web waits for hydration.
+  const [hydrated, setHydrated] = useState(process.env.EXPO_OS !== 'web');
 
   useEffect(() => {
     setHydrated(true);
@@ -40,7 +41,6 @@ export function ThemePreferenceProvider({ children }: { children: ReactNode }) {
   const value = useMemo<ThemePreferenceValue>(
     () => ({
       preference,
-      // Static web render has no device scheme, so match it until the client hydrates.
       scheme: !hydrated ? 'light' : preference === 'system' ? (systemScheme === 'dark' ? 'dark' : 'light') : preference,
       setPreference,
     }),
