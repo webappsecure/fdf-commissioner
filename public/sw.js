@@ -48,35 +48,32 @@ async function refresh(request) {
 const SCOPE_PATH = new URL(self.registration.scope).pathname;
 const IMMUTABLE_PATHS = ['_expo/static/', 'assets/'].map((path) => SCOPE_PATH + path);
 
-function fetchWithin(request, ms) {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('timeout')), ms);
-    fetch(request).then(
-      (response) => {
-        clearTimeout(timer);
-        resolve(response);
-      },
-      (error) => {
-        clearTimeout(timer);
-        reject(error);
-      },
-    );
-  });
+// Resolves null instead of rejecting so a response that wins the race leaves nothing unhandled behind.
+function timeoutAfter(ms) {
+  return new Promise((resolve) => setTimeout(() => resolve(null), ms));
+}
+
+async function fetchAndCache(request) {
+  const response = await fetch(request);
+  if (response.ok) {
+    const cache = await caches.open(CACHE);
+    await cache.put(request, response.clone());
+    await trim(cache);
+  }
+  return response;
 }
 
 // A cached page can outlive the lazily loaded files of its build, so pages try the network first.
 // A cached copy is used offline or when the network is slow; with no copy to fall back on the network gets all the time it needs.
-async function loadPage(request) {
+// A slow response keeps loading in the background and is cached for the next visit.
+async function loadPage(request, event) {
   const cached = await caches.match(request, { ignoreSearch: true });
+  const pending = fetchAndCache(request);
+  event.waitUntil(pending.catch(() => {}));
   let networkResponse = null;
   try {
-    networkResponse = cached ? await fetchWithin(request, NAVIGATION_TIMEOUT_MS) : await fetch(request);
-    if (networkResponse.ok) {
-      const cache = await caches.open(CACHE);
-      await cache.put(request, networkResponse.clone());
-      await trim(cache);
-      return withIsolationHeaders(networkResponse);
-    }
+    networkResponse = await (cached ? Promise.race([pending, timeoutAfter(NAVIGATION_TIMEOUT_MS)]) : pending);
+    if (networkResponse?.ok) return withIsolationHeaders(networkResponse);
   } catch {
     // fall through to a cached copy
   }
@@ -93,7 +90,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(loadPage(request));
+    event.respondWith(loadPage(request, event));
     return;
   }
 
