@@ -1,5 +1,5 @@
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ActionButton } from '@/components/action-button';
@@ -7,12 +7,11 @@ import { LeagueNotFound } from '@/components/league-not-found';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
-import { deleteLeague, getLeague, type League } from '@/db/leagues';
+import { ErrorTextColor, Spacing } from '@/constants/theme';
+import { deleteLeague, type League } from '@/db/leagues';
+import { useLeague } from '@/hooks/use-league';
 import { parseLeagueId } from '@/leagues/league-input';
 import { describeLeague } from '@/leagues/structures';
-
-type LoadState = { status: 'loading' } | { status: 'error' } | { status: 'missing' } | { status: 'ready'; league: League };
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -27,19 +26,10 @@ export default function LeagueHomeScreen() {
   const router = useRouter();
   const { id: rawId } = useLocalSearchParams<{ id: string }>();
   const id = parseLeagueId(rawId);
-  const [state, setState] = useState<LoadState>(id === null ? { status: 'missing' } : { status: 'loading' });
+  const { state, retry } = useLeague(id);
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteFailed, setDeleteFailed] = useState(false);
-
-  const load = useCallback(() => {
-    if (id === null) return;
-    getLeague(id)
-      .then((league) => setState(league ? { status: 'ready', league } : { status: 'missing' }))
-      .catch(() => setState({ status: 'error' }));
-  }, [id]);
-
-  useFocusEffect(load);
 
   async function confirmDelete(league: League) {
     setDeleting(true);
@@ -73,13 +63,7 @@ export default function LeagueHomeScreen() {
     return (
       <Screen>
         <ThemedText accessibilityRole="alert">The league could not be loaded.</ThemedText>
-        <ActionButton
-          label="Try again"
-          onPress={() => {
-            setState({ status: 'loading' });
-            load();
-          }}
-        />
+        <ActionButton label="Try again" onPress={retry} />
         <ActionButton label="Back to leagues" onPress={() => router.replace('/')} />
       </Screen>
     );
@@ -129,5 +113,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'space-between', padding: Spacing.three, borderRadius: Spacing.three },
   actions: { gap: Spacing.two },
   confirm: { gap: Spacing.three, padding: Spacing.three, borderRadius: Spacing.three },
-  error: { color: '#D63A3A' },
+  error: { color: ErrorTextColor },
 });

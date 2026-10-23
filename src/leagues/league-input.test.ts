@@ -1,4 +1,4 @@
-import { MAX_LEAGUE_NAME_LENGTH, parseLeagueId, validateLeagueName } from './league-input';
+import { hasDuplicateName, MAX_LEAGUE_NAME_LENGTH, parseLeagueId, validateLeagueName } from './league-input';
 
 describe('validateLeagueName', () => {
   it('trims surrounding space', () => {
@@ -30,5 +30,27 @@ describe('parseLeagueId', () => {
     ['new', '0', '-1', '1.5', '007', '', '12abc', '99999999999'].forEach((raw) => expect(parseLeagueId(raw)).toBeNull());
     expect(parseLeagueId(undefined)).toBeNull();
     expect(parseLeagueId(['1', '2'])).toBeNull();
+  });
+});
+
+describe('hasDuplicateName', () => {
+  const leagues = [
+    { id: 1, name: 'Metro' },
+    { id: 2, name: 'Élan' },
+  ];
+
+  it('ignores case and surrounding space', () => {
+    expect(hasDuplicateName(leagues, ' metro ')).toBe(true);
+    expect(hasDuplicateName(leagues, 'Metro East')).toBe(false);
+  });
+
+  it('folds non-ASCII case', () => {
+    expect(hasDuplicateName(leagues, 'élan')).toBe(true);
+    expect(hasDuplicateName(leagues, 'ÉLAN')).toBe(true);
+  });
+
+  it('skips the league being renamed', () => {
+    expect(hasDuplicateName(leagues, 'metro', 1)).toBe(false);
+    expect(hasDuplicateName(leagues, 'metro', 2)).toBe(true);
   });
 });

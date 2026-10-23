@@ -1,7 +1,7 @@
 import { useRef, useState, type ComponentRef } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
+import { ErrorTextColor, Spacing } from '@/constants/theme';
 import { LeagueError, type LeagueErrorCode } from '@/db/leagues';
 import { useTheme } from '@/hooks/use-theme';
 import { MAX_LEAGUE_NAME_LENGTH, validateLeagueName } from '@/leagues/league-input';
@@ -159,5 +159,5 @@ const styles = StyleSheet.create({
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, minHeight: 44 },
   switchState: { marginLeft: 'auto' },
   actions: { gap: Spacing.two },
-  error: { color: '#D63A3A' },
+  error: { color: ErrorTextColor },
 });

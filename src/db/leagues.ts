@@ -1,4 +1,4 @@
-import { validateLeagueName } from '@/leagues/league-input';
+import { hasDuplicateName, validateLeagueName } from '@/leagues/league-input';
 import { isLeagueSize, isValidStructure, type LeagueSize, type StructureId } from '@/leagues/structures';
 
 import { getDatabase } from './database';
@@ -77,6 +77,7 @@ export async function createLeague(input: {
   const name = checkedName(input.name);
   if (!isValidStructure(input.size, input.structure)) throw new LeagueError('invalid-structure');
   const db = await getDatabase();
+  if (hasDuplicateName(await listLeagues(), name)) throw new LeagueError('duplicate-name');
   try {
     const result = await db.runAsync(
       'INSERT INTO leagues (name, size, structure, weekly_headline_enabled, created_at) VALUES (?, ?, ?, ?, ?)',
@@ -97,6 +98,7 @@ export async function createLeague(input: {
 export async function updateLeague(id: number, input: { name: string; weeklyHeadlineEnabled: boolean }) {
   const name = checkedName(input.name);
   const db = await getDatabase();
+  if (hasDuplicateName(await listLeagues(), name, id)) throw new LeagueError('duplicate-name');
   try {
     await db.runAsync(
       'UPDATE leagues SET name = ?, weekly_headline_enabled = ? WHERE id = ?',

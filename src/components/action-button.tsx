@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
+import { DangerFillColor, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 import { ThemedText } from './themed-text';
@@ -12,12 +12,10 @@ type ActionButtonProps = {
   disabled?: boolean;
 };
 
-const DANGER = '#B3261E';
-
 export function ActionButton({ label, onPress, variant = 'secondary', disabled = false }: ActionButtonProps) {
   const theme = useTheme();
   const background =
-    variant === 'primary' ? theme.text : variant === 'danger' ? DANGER : theme.backgroundElement;
+    variant === 'primary' ? theme.text : variant === 'danger' ? DangerFillColor : theme.backgroundElement;
   const color = variant === 'primary' ? theme.background : variant === 'danger' ? '#ffffff' : theme.text;
 
   return (

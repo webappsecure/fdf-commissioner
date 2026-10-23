@@ -1,28 +1,19 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
 
 import { ActionButton } from '@/components/action-button';
 import { LeagueForm } from '@/components/league-form';
 import { LeagueNotFound } from '@/components/league-not-found';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
-import { getLeague, updateLeague, type League } from '@/db/leagues';
+import { updateLeague } from '@/db/leagues';
+import { useLeague } from '@/hooks/use-league';
 import { parseLeagueId } from '@/leagues/league-input';
-
-type LoadState = { status: 'loading' } | { status: 'error' } | { status: 'missing' } | { status: 'ready'; league: League };
 
 export default function EditLeagueScreen() {
   const router = useRouter();
   const { id: rawId } = useLocalSearchParams<{ id: string }>();
   const id = parseLeagueId(rawId);
-  const [state, setState] = useState<LoadState>(id === null ? { status: 'missing' } : { status: 'loading' });
-
-  useEffect(() => {
-    if (id === null) return;
-    getLeague(id)
-      .then((league) => setState(league ? { status: 'ready', league } : { status: 'missing' }))
-      .catch(() => setState({ status: 'error' }));
-  }, [id]);
+  const { state } = useLeague(id);
 
   if (state.status === 'missing') {
     return (
@@ -51,6 +42,12 @@ export default function EditLeagueScreen() {
 
   const { league } = state;
 
+  // A direct load or reload has no history to go back to.
+  function leave() {
+    if (router.canGoBack()) router.back();
+    else router.replace(`/league/${league.id}`);
+  }
+
   return (
     <Screen>
       <ThemedText type="subtitle">Edit league</ThemedText>
@@ -65,9 +62,9 @@ export default function EditLeagueScreen() {
         submitLabel="Save changes"
         onSubmit={async (values) => {
           await updateLeague(league.id, values);
-          router.back();
+          leave();
         }}
-        onCancel={() => router.back()}
+        onCancel={leave}
       />
     </Screen>
   );

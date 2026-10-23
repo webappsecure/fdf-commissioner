@@ -19,7 +19,7 @@ export default function NewLeagueScreen() {
           const id = await createLeague(values);
           router.replace(`/league/${id}`);
         }}
-        onCancel={() => router.back()}
+        onCancel={() => (router.canGoBack() ? router.back() : router.replace('/'))}
       />
     </Screen>
   );
