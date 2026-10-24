@@ -1,14 +1,12 @@
 import Constants from 'expo-constants';
-import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { InfoRow } from '@/components/info-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, MaxContentWidth, Spacing, TopTabInset } from '@/constants/theme';
+import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useLaunchCount } from '@/db/database-provider';
-import { requestStoragePersistence, type StorageStatus } from '@/db/storage-status';
 import { useThemePreference, type ThemePreference } from '@/theme/theme-preference';
 
 const OPTIONS: { value: ThemePreference; label: string }[] = [
@@ -20,13 +18,6 @@ const OPTIONS: { value: ThemePreference; label: string }[] = [
 export default function SettingsScreen() {
   const { preference, setPreference } = useThemePreference();
   const launchCount = useLaunchCount();
-  const [storage, setStorage] = useState<StorageStatus | null>(null);
-
-  useEffect(() => {
-    requestStoragePersistence()
-      .then(setStorage)
-      .catch(() => setStorage('unsupported'));
-  }, []);
 
   return (
     <ThemedView style={styles.container}>
@@ -60,7 +51,6 @@ export default function SettingsScreen() {
 
         <View style={styles.section}>
           <ThemedText type="smallBold">About</ThemedText>
-          <InfoRow label="Storage" value={storage ?? 'checking'} />
           <InfoRow label="App launches" value={String(launchCount)} />
           <InfoRow label="Version" value={Constants.expoConfig?.version ?? 'unknown'} />
         </View>
@@ -76,7 +66,7 @@ const styles = StyleSheet.create({
     maxWidth: MaxContentWidth,
     gap: Spacing.four,
     padding: Spacing.four,
-    paddingTop: TopTabInset + Spacing.three,
+    paddingTop: Spacing.three,
     paddingBottom: BottomTabInset + Spacing.three,
   },
   section: { gap: Spacing.two },

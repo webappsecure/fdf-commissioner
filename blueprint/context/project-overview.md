@@ -1,6 +1,6 @@
 # FDF Commissioner - Project Overview
 
-<!-- blueprint:source-hash 3e8b426b6e6dcc9c513a3458d958cf80192165d020a8a129dbf2d724eed822fb -->
+<!-- blueprint:source-hash a7819687fd9ae3ac4cd627870d36dd35a01d3de84139b6a3fd1cd2aefc67bfba -->
 
 > A local-first Expo app that runs Fast Drive Football (FDF) leagues for a single commissioner using the Commissioner Expansion rules: creation, team cards, scores, standings, and the full offseason.
 
@@ -25,7 +25,7 @@ FDF is a tabletop football game of cards and dice. The Commissioner Expansion (D
 
 Build-plan order. Headline feature: the league creation wizard and offseason wizard that automate the guide's dice procedures.
 
-1. **App shell and local storage** - navigation, light and dark themes, responsive layouts, SQLite on iOS, Android, and web PWA with persistent storage, static web export.
+1. **App shell and local storage** - navigation, light and dark themes, responsive layouts, SQLite on iOS and Android.
 2. **Rules engine and dice** - base-6 2d6 rolls (11 to 66), table lookup, manual override, roll log, unit tests.
 3. **League management** - add, edit, delete (with confirmation), settings, supported sizes and structures.
 4. **League creation wizard** - size, structure, teams, coin-flip alignment, coaches, generated names.
@@ -44,7 +44,7 @@ Build-plan order. Headline feature: the league creation wizard and offseason wiz
 17. **Relegation links** - same-sized flat leagues in a straight chain, promotion and relegation step.
 18. **History** - past seasons, champions, standings, careers.
 19. **Export and import** - league backup files and moving between devices.
-20. **Release polish** - README, license and attribution, PWA hosting, install docs.
+20. **Release polish** - README, license and attribution, run and install docs for Expo Go.
 
 ## Rules summary
 
@@ -124,9 +124,9 @@ All in SQLite. IDs are local integer or UUID keys. Shapes below are the plan's c
 
 ## Tech stack
 
-- **Expo SDK 58, React Native 0.88, TypeScript strict, npm** - one codebase for iOS, Android (Expo Go), and web.
+- **Expo SDK 58, React Native 0.88, TypeScript strict, npm** - one codebase for iOS and Android (Expo Go). Web is not a target.
 - **expo-router** - file-based routing with typed routes.
-- **expo-sqlite** - durable local storage on all platforms; web as an installed PWA requesting persistent storage.
+- **expo-sqlite** - durable local storage on iOS and Android.
 - **Rules engine** - typed table data driven by pure logic, covered by unit tests.
 - **Print support** - platform printing for cards and matchup sheets.
 - No backend, external services, or network use after install.
@@ -137,7 +137,7 @@ Not in v1 and not planned. Free, open source, public GitHub repo.
 
 ## UI/UX
 
-Clean, utilitarian, light and dark modes; team colors only as small accents. Little information per screen and minimal scrolling, many simple screens over dense ones. Works on phone, tablet, and desktop browser. Wizard flows for league creation and the offseason, with step progress, back navigation, and resume. Destructive actions confirm. Accessible contrast, touch targets, and labels.
+Clean, utilitarian, light and dark modes; team colors only as small accents. Little information per screen and minimal scrolling, many simple screens over dense ones. Designed for tablet first, and works on phone. Wizard flows for league creation and the offseason, with step progress, back navigation, and resume. Destructive actions confirm. Accessible contrast, touch targets, and labels.
 
 Main screens (route names provisional):
 
@@ -153,8 +153,7 @@ Main screens (route names provisional):
 ## Deployment
 
 - Public GitHub repo; anyone can clone, run, or install.
-- Web: static PWA export (`web.output` in `app.json` must change from `server`), hosted free, likely GitHub Pages.
-- Phone and tablet: run in Expo Go. No store listings.
+- iPad, Android tablet, and phone: run in Expo Go. No store listings.
 - No env vars, servers, workers, or health checks.
 - README with run and install steps plus license and attribution crediting the rules author and noting permission.
 

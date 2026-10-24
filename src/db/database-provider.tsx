@@ -13,11 +13,6 @@ type State =
 
 const OPEN_TIMEOUT_MS = 15000;
 
-function webDiagnostics() {
-  if (process.env.EXPO_OS !== 'web') return '';
-  return `crossOriginIsolated=${String(globalThis.crossOriginIsolated)} SharedArrayBuffer=${typeof SharedArrayBuffer}`;
-}
-
 const LaunchCountContext = createContext(0);
 
 export function useLaunchCount() {
@@ -32,7 +27,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
       () =>
         setState((current) =>
           current.status === 'loading'
-            ? { status: 'error', detail: `Timed out while: ${openStage}. ${webDiagnostics()}` }
+            ? { status: 'error', detail: `Timed out while: ${openStage}.` }
             : current,
         ),
       OPEN_TIMEOUT_MS,
@@ -57,8 +52,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
       </ThemedText>
       {state.status === 'error' && (
         <ThemedText themeColor="textSecondary" style={styles.message}>
-          The app cannot run without its local database. Close and reopen the app, or check
-          that the browser allows site storage.
+          The app cannot run without its local database. Close and reopen the app.
         </ThemedText>
       )}
       {state.status === 'error' && (

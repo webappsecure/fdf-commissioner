@@ -1,8 +1,10 @@
-# Welcome to your Expo app 👋
+# FDF Commissioner
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A local-first app for running Fast Drive Football (FDF) leagues with the Commissioner Expansion rules. It automates the guide's dice procedures (league creation, rosters, headlines, development, the draft) and keeps years of history on the device. It does not simulate games.
 
-## Get started
+Targets: iPad, Android tablets and phones, through [Expo Go](https://expo.dev/go). Web is not a target.
+
+## Run it
 
 1. Install dependencies
 
@@ -13,34 +15,20 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 2. Start the app
 
    ```bash
-   npx expo start
+   npm start
    ```
 
-In the output, you'll find options to open the app in a
+3. Scan the QR code with Expo Go, or press `i` or `a` for a simulator or emulator. `npm run ios` and `npm run android` start the same server and open that platform.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Develop
 
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- `npm test` runs the unit tests (Jest with `jest-expo`).
+- `npx tsc --noEmit` checks types.
+- `npm run lint` runs ESLint.
+- `npx expo export --platform ios` and `--platform android` check that the app bundles.
 
-## Other setup steps
+Source is in `src/` (routes in `src/app/`). Project plans and the build workflow are in `blueprint/`, and the rules guide is in `blueprint/reference/`.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Credits
 
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Built for Fast Drive Football and the Commissioner Expansion (Draft Edition v1.0) by d6 Gaming / PLAAY Games. The rules author has given permission to include the rules. License and attribution details come with the release polish step (feature 20). This project started from the Expo starter, which is MIT licensed (see `LICENSE`).

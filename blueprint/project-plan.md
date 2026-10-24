@@ -78,11 +78,9 @@ player's name stays reserved for good.
 
 - Expo SDK 58, React Native 0.88, expo-router (file-based, typed routes),
   TypeScript strict, npm. The project is already scaffolded.
-- `expo-sqlite` for local storage on iOS, Android, and web. On web the app is
-  installed as a PWA and must request persistent storage so the browser does not
-  evict the database.
-- The web build must be a static export (the scaffold's `web.output: "server"`
-  will change) so it can be hosted free, for example on GitHub Pages.
+- `expo-sqlite` for local storage on iOS and Android.
+- Web is not a target. The app runs on iPad and Android tablets (and phones)
+  through Expo Go.
 - Everything must run in Expo Go for tablet and phone users.
 - The rules tables (player creation, development, retirement, headlines, draft,
   coach tables) are encoded as typed data and driven by a small engine, not
@@ -103,7 +101,7 @@ author has given permission to include the rules content.
   colors appear only as accents, such as a swatch or stripe beside a team name.
 - Little information per screen and minimal scrolling. Prefer many simple,
   focused screens over dense ones.
-- Easy navigation, designed for phone, tablet, and desktop browser sizes.
+- Easy navigation, designed for tablet and phone sizes.
 - Wizard-style flows for league creation and the offseason, with clear step
   progress, the ability to go back, and resumable state.
 - Destructive actions (deleting a league, undoing a roll) always confirm.
@@ -112,7 +110,6 @@ author has given permission to include the rules content.
 ## 8. Deployment - Where and how will this ship?
 
 - Public GitHub repo. Anyone can clone, run, or install it.
-- Web: a static PWA export hosted free (GitHub Pages is the likely host).
 - Phone and tablet: run through Expo Go as a developer would. There are no
   App Store or Play Store listings.
 - No environment variables, servers, or workers are needed.

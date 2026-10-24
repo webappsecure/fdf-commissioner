@@ -21,8 +21,7 @@
 
 - Expo SDK 58, React Native 0.88, npm, TypeScript strict
 - File-based routing with expo-router in `src/app/`; typed routes are enabled
-- Platform-specific files use `.web.tsx` / `.ios.tsx` suffixes, as in `app-tabs.web.tsx`
-- Web output is `server`; keep browser-only APIs out of shared render paths
+- Platform-specific files use `.ios.tsx` / `.android.tsx` suffixes when needed. Web is not a target
 - Import with the `@/` alias (`@/components/...`, `@/hooks/...`)
 
 ## File Organization
@@ -43,7 +42,6 @@
 ## Styling
 
 - React Native `StyleSheet` plus the theme in `src/constants/theme.ts` and the `themed-*` components
-- `src/global.css` is for web-only styling
 - Support light and dark via `useColorScheme` / `use-theme`
 
 ## Data and APIs
@@ -104,8 +102,9 @@ or other native modules rather than importing them into a test.
 
 ## Browser Verification
 
-For UI and integration behavior, prefer real browser evidence over reading the
-code and assuming it works.
+For UI and integration behavior, prefer evidence from a running app over reading the
+code and assuming it works. This project has no web target, so the evidence is
+a tablet or phone in Expo Go, or a simulator; the user runs the app and reports back.
 
 - Browser automation is separately opt-in through `/tests browser`. That setup
   reuses a compatible runner or prefers Playwright for supported projects, then

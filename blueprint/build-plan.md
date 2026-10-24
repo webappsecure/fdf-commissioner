@@ -8,7 +8,7 @@ Scaffolding the app is already done. Start with the first real slice.
 
 ## Milestone 1: Foundation
 
-- [x] 1. **App shell and local storage** - navigation, theme with light and dark modes, responsive layouts, SQLite on iOS, Android and web (PWA with persistent storage), static web export
+- [x] 1. **App shell and local storage** - navigation, theme with light and dark modes, responsive layouts, SQLite on iOS and Android
 - [x] 2. **Rules engine and dice** - 2d6 base-6 rolls, roll-table lookup, manual override, roll log, with unit tests on the table logic
 
 ## Milestone 2: Leagues and teams
@@ -45,4 +45,4 @@ Scaffolding the app is already done. Start with the first real slice.
 
 ## Milestone 7: Release
 
-- [ ] 20. **Release polish** - README, license and rules-author attribution, PWA hosting setup, run and install docs
+- [ ] 20. **Release polish** - README, license and rules-author attribution, run and install docs for Expo Go

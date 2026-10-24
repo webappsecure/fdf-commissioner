@@ -323,14 +323,14 @@ checks do not make the Blueprint unusable.
 Expo (React Native, expo-router) app with TypeScript, npm.
 
 - Dev server: `npm start` (`expo start`)
-- iOS / Android / Web: `npm run ios`, `npm run android`, `npm run web`
+- iOS / Android: `npm run ios`, `npm run android` (Expo Go on a tablet or phone; web is not a target)
 - Typecheck: `npx tsc --noEmit`
 - Test: `npm test` (Jest with `jest-expo`; `npm run test:watch` to watch)
 - Lint: `npm run lint` (`expo lint`; ESLint with `eslint-config-expo`, configured in `eslint.config.js`)
-- Build: none configured. Web export is `npx expo export --platform web`, which the Expo config sets to static output (`dist/`).
+- Build: none configured. Native bundling can be checked with `npx expo export --platform ios` and `npx expo export --platform android`.
 
 Unit tests use Jest with `jest-expo` and live next to source files (`*.test.ts`). They
-cover pure logic; UI and device behavior are checked by hand or in the browser.
+cover pure logic; UI and device behavior are checked by hand on a device or simulator through Expo Go.
 
 Browser testing is also opt-in. Run `/tests browser` or `$tests browser` to add
 or normalize a browser harness and document its exact command as `Browser
