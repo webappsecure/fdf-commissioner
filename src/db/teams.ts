@@ -1,0 +1,173 @@
+import { findDraftProblem, type LeagueDraft } from '@/leagues/league-draft';
+import { layoutFor } from '@/leagues/team-layout';
+import type { CoachFocus, CoachSpecialty, GameDayQuality } from '@/rules/coach-tables';
+import type { RollResult } from '@/rules/roll';
+import { recordRoll } from '@/rules/roll-log';
+
+import { getDatabase } from './database';
+import { getLeague } from './leagues';
+import { sqliteRollLogStore } from './roll-log';
+
+export type TeamsErrorCode = 'league-missing' | 'already-set-up' | 'invalid-draft';
+
+export class TeamsError extends Error {
+  constructor(
+    readonly code: TeamsErrorCode,
+    detail?: string,
+  ) {
+    super(detail ? `${code}: ${detail}` : code);
+    this.name = 'TeamsError';
+  }
+}
+
+export type TeamWithCoach = {
+  id: number;
+  location: string;
+  name: string;
+  primaryColor: string;
+  secondaryColor: string;
+  alignment: '4-3' | '3-4';
+  divisionId: number | null;
+  divisionName: string | null;
+  conferenceName: string | null;
+  coach: {
+    name: string;
+    age: number;
+    focus: CoachFocus;
+    specialty: CoachSpecialty;
+    gameDayQuality: GameDayQuality;
+  };
+};
+
+type TeamRow = {
+  id: number;
+  location: string;
+  name: string;
+  primary_color: string;
+  secondary_color: string;
+  alignment: '4-3' | '3-4';
+  division_id: number | null;
+  division_name: string | null;
+  conference_name: string | null;
+  coach_name: string;
+  coach_age: number;
+  coach_focus: CoachFocus;
+  coach_specialty: CoachSpecialty;
+  coach_game_day: GameDayQuality;
+};
+
+export async function listTeams(leagueId: number): Promise<TeamWithCoach[]> {
+  const db = await getDatabase();
+  const rows = await db.getAllAsync<TeamRow>(
+    `SELECT t.id, t.location, t.name, t.primary_color, t.secondary_color, t.alignment, t.division_id,
+            d.name AS division_name, c.name AS conference_name,
+            h.name AS coach_name, h.age AS coach_age, h.focus AS coach_focus,
+            h.specialty AS coach_specialty, h.game_day_quality AS coach_game_day
+     FROM teams t
+     JOIN coaches h ON h.id = t.head_coach_id
+     LEFT JOIN divisions d ON d.id = t.division_id
+     LEFT JOIN conferences c ON c.id = t.conference_id
+     WHERE t.league_id = ?
+     ORDER BY t.division_id, t.id`,
+    leagueId,
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    location: row.location,
+    name: row.name,
+    primaryColor: row.primary_color,
+    secondaryColor: row.secondary_color,
+    alignment: row.alignment,
+    divisionId: row.division_id,
+    divisionName: row.division_name,
+    conferenceName: row.conference_name,
+    coach: {
+      name: row.coach_name,
+      age: row.coach_age,
+      focus: row.coach_focus,
+      specialty: row.coach_specialty,
+      gameDayQuality: row.coach_game_day,
+    },
+  }));
+}
+
+/**
+ * Saves every conference, division, team and coach of a finished wizard in one transaction, and logs the coaches'
+ * rolls. League id and group membership come from the route league and its layout, never from the draft.
+ */
+export async function createLeagueTeams(leagueId: number, draft: LeagueDraft) {
+  const db = await getDatabase();
+  await db.withTransactionAsync(async () => {
+    const league = await getLeague(leagueId);
+    if (!league) throw new TeamsError('league-missing');
+    const existing = await db.getFirstAsync<{ count: number }>('SELECT COUNT(*) AS count FROM teams WHERE league_id = ?', leagueId);
+    if ((existing?.count ?? 0) > 0) throw new TeamsError('already-set-up');
+    const problem = findDraftProblem(league.size, league.structure, draft);
+    if (problem) throw new TeamsError('invalid-draft', problem);
+
+    const layout = layoutFor(league.size, league.structure);
+    const conferenceIds: number[] = [];
+    for (const name of draft.conferenceNames) {
+      const result = await db.runAsync('INSERT INTO conferences (league_id, name) VALUES (?, ?)', leagueId, name.trim());
+      conferenceIds.push(result.lastInsertRowId);
+    }
+    const divisionIds: number[] = [];
+    for (let index = 0; index < draft.divisionNames.length; index++) {
+      const group = layout.groups[index];
+      const conferenceId = group.conferenceIndex ? conferenceIds[group.conferenceIndex - 1] : null;
+      const result = await db.runAsync(
+        'INSERT INTO divisions (league_id, conference_id, name) VALUES (?, ?, ?)',
+        leagueId,
+        conferenceId,
+        draft.divisionNames[index].trim(),
+      );
+      divisionIds.push(result.lastInsertRowId);
+    }
+
+    let slot = 0;
+    for (const group of layout.groups) {
+      const divisionId = group.divisionIndex ? divisionIds[group.divisionIndex - 1] : null;
+      const conferenceId = group.conferenceIndex ? conferenceIds[group.conferenceIndex - 1] : null;
+      for (let offset = 0; offset < group.teamCount; offset++, slot++) {
+        const team = draft.teams[slot]!;
+        const coach = team.coach!;
+        const coachResult = await db.runAsync(
+          `INSERT INTO coaches (league_id, name, age, focus, specialty, game_day_quality, status)
+           VALUES (?, ?, ?, ?, ?, ?, 'active')`,
+          leagueId,
+          coach.name.trim(),
+          coach.age!.outcome!,
+          coach.focus!.outcome!,
+          coach.specialty!.outcome!,
+          coach.gameDay!.outcome!,
+        );
+        const coachId = coachResult.lastInsertRowId;
+        const teamResult = await db.runAsync(
+          `INSERT INTO teams (league_id, location, name, primary_color, secondary_color, alignment, division_id, conference_id, head_coach_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          leagueId,
+          team.location.trim(),
+          team.name.trim(),
+          team.primaryColor.toUpperCase(),
+          team.secondaryColor.toUpperCase(),
+          team.alignment,
+          divisionId,
+          conferenceId,
+          coachId,
+        );
+        const teamId = teamResult.lastInsertRowId;
+        await db.runAsync('UPDATE coaches SET team_id = ? WHERE id = ?', teamId, coachId);
+
+        const rolls: [string, RollResult][] = [
+          ['coach-age', coach.age!],
+          ['coach-focus', coach.focus!],
+          ['coach-specialty', coach.specialty!],
+          ['coach-game-day', coach.gameDay!],
+        ];
+        for (const [step, roll] of rolls) {
+          await recordRoll(sqliteRollLogStore, roll, { leagueId, teamId, coachId, step });
+        }
+      }
+    }
+  });
+}

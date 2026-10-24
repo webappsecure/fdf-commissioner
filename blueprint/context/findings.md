@@ -7,10 +7,10 @@
 > finding is `open` or `fixed`, then archives resolved findings with the work
 > and resets this file.
 
-### F-28 [P3] fixed - A slow connection can still be served the stale page
+### F-29 [P3] open - A coach name that is too long shows no error on the coach screen
 
-**File:** public/sw.js:72
-**Found:** 2026-10-23 by /audit (scope: full; lens: all)
-**Why it matters:** When a cached page exists and the network takes longer than 3 seconds, `loadPage` serves the cached page and drops the network response, which is never cached. On a connection that is consistently slower than that, the cached page stays old after an update, and its lazily loaded route files are gone from the server, which is the crash F-23 fixed for fast connections. Found by reading the code; not reproduced.
-**Suggested fix:** Let the timed-out request finish and cache its response in the background (for example with `event.waitUntil`) so the next load is fresh. A small change in `loadPage`; recheck the slow-network and update flows on a built copy.
-**Resolution:** `loadPage` starts one `fetchAndCache` and keeps it alive with `event.waitUntil`; a response that arrives after the 3 second wait is still cached for the next load. Needs the throttled update check on a built copy.
+**File:** src/app/(leagues)/league/[id]/new/coach/[slot].tsx:150
+**Found:** 2026-10-24 by /audit independent (scope: current; lens: quality)
+**Why it matters:** The coach screen shows the name error only when `problem.includes('name')`. `coachProblem` returns "Name is too long." for a name over 40 characters, which has a capital N and no lowercase "name", so the check is false and nothing is shown under the field. The input allows 50 characters, so a 41 to 50 character name is accepted by the field, the coaches list row shows the error, and Next stays disabled, but the screen where the person is typing gives no explanation. Found by reading the code; not run.
+**Suggested fix:** Have `coachProblem` return a code or a separate name-error value, or compare case-insensitively, so every name problem renders under the Coach name field. A one-line change plus a small test of which problems are name problems.
+**Resolution:**

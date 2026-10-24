@@ -17,7 +17,7 @@ export default function NewLeagueScreen() {
         submitLabel="Create league"
         onSubmit={async (values) => {
           const id = await createLeague(values);
-          router.replace(`/league/${id}`);
+          router.replace(`/league/${id}/new`);
         }}
         onCancel={() => (router.canGoBack() ? router.back() : router.replace('/'))}
       />

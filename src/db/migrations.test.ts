@@ -10,6 +10,10 @@ describe('migrations', () => {
     expect(migrations[0]).toContain('CREATE TABLE app_meta');
     expect(migrations[1]).toContain('CREATE TABLE roll_log');
     expect(migrations[2]).toContain('CREATE TABLE leagues');
+    expect(migrations[3]).toContain('CREATE TABLE conferences');
+    expect(migrations[4]).toContain('CREATE TABLE divisions');
+    expect(migrations[5]).toContain('CREATE TABLE teams');
+    expect(migrations[6]).toContain('CREATE TABLE coaches');
   });
 
   it('makes league names unique ignoring case and leaves Weekly Headline off by default', () => {

@@ -14,7 +14,7 @@ Scaffolding the app is already done. Start with the first real slice.
 ## Milestone 2: Leagues and teams
 
 - [x] 3. **League management** - add, edit, and delete leagues (with confirmation), league settings, supported sizes and structures
-- [ ] 4. **League creation wizard** - size and structure, teams (name, location, colors), coin-flip alignment, coaches, generated names from the provided list
+- [x] 4. **League creation wizard** - size and structure, teams (name, location, colors), coin-flip alignment, coaches, generated names from the provided list
 - [ ] 5. **Roster creation** - roll the 25 starters, kickers and returners, and the backup rules, using the guide's creation tables
 - [ ] 6. **Team qualities and team view** - team scoring and prevention qualities, tendency, player and coach quality combination, team screens with minimal scrolling
 

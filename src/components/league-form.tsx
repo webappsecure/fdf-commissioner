@@ -1,5 +1,5 @@
 import { useRef, useState, type ComponentRef } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 
 import { ErrorTextColor, Spacing } from '@/constants/theme';
 import { LeagueError, type LeagueErrorCode } from '@/db/leagues';
@@ -8,8 +8,8 @@ import { MAX_LEAGUE_NAME_LENGTH, validateLeagueName } from '@/leagues/league-inp
 import { describeLeague, LEAGUE_SIZES, structuresFor, type LeagueSize, type StructureId } from '@/leagues/structures';
 
 import { ActionButton } from './action-button';
+import { Choice } from './choice';
 import { ThemedText } from './themed-text';
-import { ThemedView } from './themed-view';
 import { ToggleSwitch } from './toggle-switch';
 
 export type LeagueFormValues = {
@@ -32,18 +32,6 @@ const NAME_ERRORS: Partial<Record<LeagueErrorCode, string>> = {
   'name-too-long': `Use ${MAX_LEAGUE_NAME_LENGTH} characters or fewer.`,
   'duplicate-name': 'Another league already uses this name.',
 };
-
-function Choice({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
-  return (
-    <Pressable accessibilityRole="radio" accessibilityState={{ selected }} onPress={onPress}>
-      <ThemedView type={selected ? 'backgroundSelected' : 'backgroundElement'} style={styles.choice}>
-        <ThemedText type="small" themeColor={selected ? 'text' : 'textSecondary'}>
-          {label}
-        </ThemedText>
-      </ThemedView>
-    </Pressable>
-  );
-}
 
 export function LeagueForm({ mode, initial, submitLabel, onSubmit, onCancel }: LeagueFormProps) {
   const theme = useTheme();
@@ -155,7 +143,6 @@ const styles = StyleSheet.create({
   field: { gap: Spacing.two },
   input: { minHeight: 44, paddingHorizontal: Spacing.three, borderRadius: Spacing.three, fontSize: 16 },
   choices: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  choice: { minHeight: 44, minWidth: 44, paddingHorizontal: Spacing.three, alignItems: 'center', justifyContent: 'center', borderRadius: Spacing.three },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, minHeight: 44 },
   switchState: { marginLeft: 'auto' },
   actions: { gap: Spacing.two },
