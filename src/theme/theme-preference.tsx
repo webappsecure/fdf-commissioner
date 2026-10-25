@@ -1,4 +1,4 @@
-import { createContext, use, useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { createContext, use, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useColorScheme as useSystemColorScheme } from 'react-native';
 
 import { getMeta, setMeta } from '@/db/database';
@@ -14,9 +14,6 @@ type ThemePreferenceValue = {
 
 const THEME_KEY = 'theme_preference';
 
-// Never changes; it only lets React pick the server value during web hydration and the client value after.
-const subscribeNever = () => () => {};
-
 const ThemePreferenceContext = createContext<ThemePreferenceValue>({
   preference: 'system',
   scheme: 'light',
@@ -26,9 +23,6 @@ const ThemePreferenceContext = createContext<ThemePreferenceValue>({
 export function ThemePreferenceProvider({ children }: { children: ReactNode }) {
   const systemScheme = useSystemColorScheme();
   const [preference, setPreferenceState] = useState<ThemePreference>('system');
-  // Static web rendering has no device scheme, so web waits for hydration: false while hydrating, true after.
-  // Native never hydrates, so it reads true at once.
-  const hydrated = useSyncExternalStore(subscribeNever, () => true, () => false);
 
   useEffect(() => {
     getMeta(THEME_KEY)
@@ -44,10 +38,10 @@ export function ThemePreferenceProvider({ children }: { children: ReactNode }) {
   const value = useMemo<ThemePreferenceValue>(
     () => ({
       preference,
-      scheme: !hydrated ? 'light' : preference === 'system' ? (systemScheme === 'dark' ? 'dark' : 'light') : preference,
+      scheme: preference === 'system' ? (systemScheme === 'dark' ? 'dark' : 'light') : preference,
       setPreference,
     }),
-    [preference, systemScheme, hydrated, setPreference],
+    [preference, systemScheme, setPreference],
   );
 
   return <ThemePreferenceContext value={value}>{children}</ThemePreferenceContext>;

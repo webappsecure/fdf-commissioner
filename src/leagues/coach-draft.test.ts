@@ -1,7 +1,7 @@
 import { COACH_AGE_TABLE, COACH_FOCUS_TABLE, DEFENSE_SPECIALTY_TABLE, GAME_DAY_QUALITY_TABLE, OFFENSE_SPECIALTY_TABLE } from '@/rules/coach-tables';
 import { findTableIssues, lookup } from '@/rules/tables';
 
-import { coachProblem, createCoachDraft, describeDraftCoach, isCoachComplete, rollCoachAge, rollCoachFocus, rollCoachSpecialty, rollWholeCoach } from './coach-draft';
+import { coachNameProblem, coachProblem, createCoachDraft, describeDraftCoach, isCoachComplete, rollCoachAge, rollCoachFocus, rollCoachSpecialty, rollWholeCoach } from './coach-draft';
 import { COACH_NAMES } from './coach-name-list';
 import { hasDuplicateCoachName, pickCoachName, validateCoachName } from './coach-names';
 
@@ -110,6 +110,14 @@ describe('coachProblem', () => {
     expect(coachProblem({ ...done, name: ' ' }, ['', 'Bob Ray'], 0)).toBe('Needs a name.');
     expect(coachProblem({ ...done, name: 'bob ray' }, ['bob ray', 'Bob Ray'], 0)).toBe('Another coach already has this name.');
     expect(coachProblem({ ...done, gameDay: null }, ['Ann Lee'], 0)).toBe('Needs all four rolls.');
+  });
+
+  it('reports every name problem, including a too-long name, as a name problem', () => {
+    const done = rollWholeCoach('Ann Lee', () => 0.5);
+    expect(coachNameProblem({ ...done, name: 'x'.repeat(41) }, ['x'.repeat(41)], 0)).toBe('Name is too long.');
+    expect(coachNameProblem({ ...done, name: '' }, [''], 0)).toBe('Needs a name.');
+    expect(coachNameProblem({ ...done, name: 'ann lee' }, ['ann lee', 'Ann Lee'], 0)).toBe('Another coach already has this name.');
+    expect(coachNameProblem({ ...done, gameDay: null }, ['Ann Lee'], 0)).toBeNull();
   });
 
   it('describes a finished coach for the summary lines', () => {

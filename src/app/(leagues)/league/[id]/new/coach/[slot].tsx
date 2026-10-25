@@ -10,7 +10,7 @@ import { ThemedView } from '@/components/themed-view';
 import { ErrorTextColor, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import {
-  coachProblem,
+  coachNameProblem,
   rollCoachAge,
   rollCoachFocus,
   rollCoachGameDay,
@@ -114,7 +114,7 @@ export default function CoachScreen() {
   const coach = team.coach;
   const allNames = draft.teams.map((candidate) => candidate?.coach?.name ?? '');
   const otherNames = allNames.filter((_, index) => index !== slot);
-  const problem = coach ? coachProblem(coach, allNames, slot) : null;
+  const nameProblem = coach ? coachNameProblem(coach, allNames, slot) : null;
 
   if (!coach) {
     return (
@@ -147,8 +147,8 @@ export default function CoachScreen() {
             autoCapitalize="words"
             style={[styles.input, { backgroundColor: theme.backgroundElement, color: theme.text }]}
           />
-          {problem && problem.includes('name') && (
-            <ThemedText type="small" accessibilityRole="alert" style={styles.error}>{problem}</ThemedText>
+          {nameProblem && (
+            <ThemedText type="small" accessibilityRole="alert" style={styles.error}>{nameProblem}</ThemedText>
           )}
           <ActionButton
             label="Draw another name"

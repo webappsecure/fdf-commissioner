@@ -1,7 +1,6 @@
 import { findDraftProblem, type LeagueDraft } from '@/leagues/league-draft';
-import { layoutFor } from '@/leagues/team-layout';
+import { planLeagueRows } from '@/leagues/league-plan';
 import type { CoachFocus, CoachSpecialty, GameDayQuality } from '@/rules/coach-tables';
-import type { RollResult } from '@/rules/roll';
 import { recordRoll } from '@/rules/roll-log';
 
 import { getDatabase } from './database';
@@ -105,68 +104,54 @@ export async function createLeagueTeams(leagueId: number, draft: LeagueDraft) {
     const problem = findDraftProblem(league.size, league.structure, draft);
     if (problem) throw new TeamsError('invalid-draft', problem);
 
-    const layout = layoutFor(league.size, league.structure);
+    const plan = planLeagueRows(league.size, league.structure, draft);
+
     const conferenceIds: number[] = [];
-    for (const name of draft.conferenceNames) {
-      const result = await db.runAsync('INSERT INTO conferences (league_id, name) VALUES (?, ?)', leagueId, name.trim());
+    for (const conference of plan.conferences) {
+      const result = await db.runAsync('INSERT INTO conferences (league_id, name) VALUES (?, ?)', leagueId, conference.name);
       conferenceIds.push(result.lastInsertRowId);
     }
     const divisionIds: number[] = [];
-    for (let index = 0; index < draft.divisionNames.length; index++) {
-      const group = layout.groups[index];
-      const conferenceId = group.conferenceIndex ? conferenceIds[group.conferenceIndex - 1] : null;
+    for (const division of plan.divisions) {
       const result = await db.runAsync(
         'INSERT INTO divisions (league_id, conference_id, name) VALUES (?, ?, ?)',
         leagueId,
-        conferenceId,
-        draft.divisionNames[index].trim(),
+        division.conferenceIndex ? conferenceIds[division.conferenceIndex - 1] : null,
+        division.name,
       );
       divisionIds.push(result.lastInsertRowId);
     }
 
-    let slot = 0;
-    for (const group of layout.groups) {
-      const divisionId = group.divisionIndex ? divisionIds[group.divisionIndex - 1] : null;
-      const conferenceId = group.conferenceIndex ? conferenceIds[group.conferenceIndex - 1] : null;
-      for (let offset = 0; offset < group.teamCount; offset++, slot++) {
-        const team = draft.teams[slot]!;
-        const coach = team.coach!;
-        const coachResult = await db.runAsync(
-          `INSERT INTO coaches (league_id, name, age, focus, specialty, game_day_quality, status)
-           VALUES (?, ?, ?, ?, ?, ?, 'active')`,
-          leagueId,
-          coach.name.trim(),
-          coach.age!.outcome!,
-          coach.focus!.outcome!,
-          coach.specialty!.outcome!,
-          coach.gameDay!.outcome!,
-        );
-        const coachId = coachResult.lastInsertRowId;
-        const teamResult = await db.runAsync(
-          `INSERT INTO teams (league_id, location, name, primary_color, secondary_color, alignment, division_id, conference_id, head_coach_id)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          leagueId,
-          team.location.trim(),
-          team.name.trim(),
-          team.primaryColor.toUpperCase(),
-          team.secondaryColor.toUpperCase(),
-          team.alignment,
-          divisionId,
-          conferenceId,
-          coachId,
-        );
-        const teamId = teamResult.lastInsertRowId;
-        await db.runAsync('UPDATE coaches SET team_id = ? WHERE id = ?', teamId, coachId);
+    for (const team of plan.teams) {
+      const coachResult = await db.runAsync(
+        `INSERT INTO coaches (league_id, name, age, focus, specialty, game_day_quality, status)
+         VALUES (?, ?, ?, ?, ?, ?, 'active')`,
+        leagueId,
+        team.coach.name,
+        team.coach.age,
+        team.coach.focus,
+        team.coach.specialty,
+        team.coach.gameDayQuality,
+      );
+      const coachId = coachResult.lastInsertRowId;
+      const teamResult = await db.runAsync(
+        `INSERT INTO teams (league_id, location, name, primary_color, secondary_color, alignment, division_id, conference_id, head_coach_id)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        leagueId,
+        team.location,
+        team.name,
+        team.primaryColor,
+        team.secondaryColor,
+        team.alignment,
+        team.divisionIndex ? divisionIds[team.divisionIndex - 1] : null,
+        team.conferenceIndex ? conferenceIds[team.conferenceIndex - 1] : null,
+        coachId,
+      );
+      const teamId = teamResult.lastInsertRowId;
+      await db.runAsync('UPDATE coaches SET team_id = ? WHERE id = ?', teamId, coachId);
 
-        const rolls: [string, RollResult][] = [
-          ['coach-age', coach.age!],
-          ['coach-focus', coach.focus!],
-          ['coach-specialty', coach.specialty!],
-          ['coach-game-day', coach.gameDay!],
-        ];
-        for (const [step, roll] of rolls) {
-          await recordRoll(sqliteRollLogStore, roll, { leagueId, teamId, coachId, step });
-        }
+      for (const { step, roll } of team.rolls) {
+        await recordRoll(sqliteRollLogStore, roll, { leagueId, teamId, coachId, step });
       }
     }
   });

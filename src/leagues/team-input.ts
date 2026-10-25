@@ -1,39 +1,30 @@
+import { checkNameLength, nameKey, type NameLengthResult } from './name-rules';
+
 export const MAX_TEAM_TEXT_LENGTH = 40;
 export const MAX_GROUP_NAME_LENGTH = 40;
 
-export type TextResult = { ok: true; value: string } | { ok: false; error: 'empty' | 'too-long' };
-
-function validateText(raw: string, max: number): TextResult {
-  const value = raw.trim();
-  if (value.length === 0) return { ok: false, error: 'empty' };
-  if (value.length > max) return { ok: false, error: 'too-long' };
-  return { ok: true, value };
-}
+export type TextResult = NameLengthResult;
 
 /** Location or team name. */
 export function validateTeamText(raw: string) {
-  return validateText(raw, MAX_TEAM_TEXT_LENGTH);
+  return checkNameLength(raw, MAX_TEAM_TEXT_LENGTH);
 }
 
 export function validateGroupName(raw: string) {
-  return validateText(raw, MAX_GROUP_NAME_LENGTH);
-}
-
-function key(...parts: string[]) {
-  return parts.map((part) => part.trim().toLowerCase()).join(' ');
+  return checkNameLength(raw, MAX_GROUP_NAME_LENGTH);
 }
 
 type TeamText = { location: string; name: string };
 
 /** True when another team already has this "location name". `exceptIndex` skips the team being edited. */
 export function hasDuplicateTeam(teams: readonly (TeamText | null)[], candidate: TeamText, exceptIndex?: number) {
-  const wanted = key(candidate.location, candidate.name);
-  return teams.some((team, index) => team !== null && index !== exceptIndex && key(team.location, team.name) === wanted);
+  const wanted = nameKey(candidate.location, candidate.name);
+  return teams.some((team, index) => team !== null && index !== exceptIndex && nameKey(team.location, team.name) === wanted);
 }
 
 export function hasDuplicateGroupName(names: readonly string[], name: string, exceptIndex?: number) {
-  const wanted = key(name);
-  return names.some((candidate, index) => index !== exceptIndex && key(candidate) === wanted);
+  const wanted = nameKey(name);
+  return names.some((candidate, index) => index !== exceptIndex && nameKey(candidate) === wanted);
 }
 
 export const PALETTE = [

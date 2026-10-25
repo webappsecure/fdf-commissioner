@@ -67,13 +67,17 @@ export function rollWholeCoach(name: string, random?: RandomFn): CoachDraft {
   return draft;
 }
 
-/** What still stops this coach from being saved, or null. `index` is the coach's position in `allNames`. */
-export function coachProblem(draft: CoachDraft, allNames: readonly string[], index: number) {
+/** What is wrong with this coach's name, or null. `index` is the coach's position in `allNames`. */
+export function coachNameProblem(draft: CoachDraft, allNames: readonly string[], index: number) {
   const checked = validateCoachName(draft.name);
   if (!checked.ok) return checked.error === 'empty' ? 'Needs a name.' : 'Name is too long.';
   if (hasDuplicateCoachName(allNames.filter((_, position) => position !== index), draft.name)) return 'Another coach already has this name.';
-  if (!isCoachComplete(draft)) return 'Needs all four rolls.';
   return null;
+}
+
+/** What still stops this coach from being saved, or null. */
+export function coachProblem(draft: CoachDraft, allNames: readonly string[], index: number) {
+  return coachNameProblem(draft, allNames, index) ?? (isCoachComplete(draft) ? null : 'Needs all four rolls.');
 }
 
 export function describeDraftCoach(draft: CoachDraft) {
