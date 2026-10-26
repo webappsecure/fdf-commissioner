@@ -51,7 +51,7 @@ export default function TeamsStep() {
     <WizardFrame
       step={1}
       nextDisabled={filled < draft.teams.length || !groupsValid}
-      onNext={() => router.push(`${base}/alignment`)}>
+      onNext={() => router.push(`${base}/coaches`)}>
       <ThemedText themeColor="textSecondary">
         {filled} of {draft.teams.length} teams entered. Tap a slot to enter a team.
       </ThemedText>

@@ -10,10 +10,10 @@ import { Screen } from './screen';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
-const STEPS = ['Teams', 'Alignment', 'Coaches', 'Review'];
+const STEPS = ['Teams', 'Coaches', 'Review'];
 
 type WizardFrameProps = {
-  /** 1 to 4. */
+  /** 1 to 3. */
   step: number;
   children: ReactNode;
   backHref?: Href;

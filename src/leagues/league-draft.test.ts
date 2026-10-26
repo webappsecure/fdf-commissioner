@@ -8,7 +8,6 @@ function team(index: number): TeamDraft {
     name: `Team ${index}`,
     primaryColor: '#C62828',
     secondaryColor: '#FFFFFF',
-    alignment: '4-3',
     coach: rollWholeCoach(COACH_NAMES[index], () => 0.5),
   };
 }
@@ -43,7 +42,7 @@ describe('findDraftProblem', () => {
     expect(findDraftProblem(6, 'flat', { ...fullDraft(), divisionNames: ['Division 1'] })).toBe('wrong division count');
   });
 
-  it('rejects duplicate teams, equal colors, a bad color and a missing alignment', () => {
+  it('rejects duplicate teams, equal colors, and a bad color', () => {
     let draft = fullDraft();
     draft.teams[1] = { ...team(1), location: ' city 0 ', name: 'TEAM 0' };
     expect(findDraftProblem(6, 'flat', draft)).toBe('duplicate team');
@@ -53,9 +52,6 @@ describe('findDraftProblem', () => {
     draft = fullDraft();
     draft.teams[0] = { ...team(0), primaryColor: 'red' };
     expect(findDraftProblem(6, 'flat', draft)).toBe('invalid color');
-    draft = fullDraft();
-    draft.teams[0] = { ...team(0), alignment: null };
-    expect(findDraftProblem(6, 'flat', draft)).toBe('missing alignment');
   });
 
   it('rejects duplicate coach names and incomplete coaches', () => {

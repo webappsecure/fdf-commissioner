@@ -70,7 +70,6 @@ export default function TeamForm() {
       name: checkedName.ok ? checkedName.value : '',
       primaryColor: primaryHex!,
       secondaryColor: secondaryHex!,
-      alignment: null,
       coach: null,
     });
     leave();

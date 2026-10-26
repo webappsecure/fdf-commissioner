@@ -14,10 +14,21 @@ describe('migrations', () => {
     expect(migrations[4]).toContain('CREATE TABLE divisions');
     expect(migrations[5]).toContain('CREATE TABLE teams');
     expect(migrations[6]).toContain('CREATE TABLE coaches');
+    expect(migrations[7]).toContain('CREATE TABLE teams_new');
   });
 
   it('makes league names unique ignoring case and leaves Weekly Headline off by default', () => {
     expect(migrations[2]).toContain('COLLATE NOCASE UNIQUE');
     expect(migrations[2]).toContain('weekly_headline_enabled INTEGER NOT NULL DEFAULT 0');
+  });
+
+  it('rebuilds teams with a nullable alignment and keeps every row', () => {
+    const rebuild = migrations[7];
+    expect(rebuild).toMatch(/alignment TEXT,/);
+    expect(rebuild).not.toMatch(/alignment TEXT NOT NULL/);
+    expect(rebuild).toContain('INSERT INTO teams_new');
+    expect(rebuild).toContain('FROM teams;');
+    expect(rebuild).toContain('DROP TABLE teams;');
+    expect(rebuild).toContain('ALTER TABLE teams_new RENAME TO teams;');
   });
 });

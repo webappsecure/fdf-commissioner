@@ -2,14 +2,13 @@ import { isCoachComplete, type CoachDraft } from './coach-draft';
 import { hasDuplicateCoachName, validateCoachName } from './coach-names';
 import type { LeagueSize, StructureId } from './structures';
 import { hasDuplicateGroupName, hasDuplicateTeam, parseHexColor, validateGroupName, validateTeamText } from './team-input';
-import { layoutFor, type Alignment } from './team-layout';
+import { layoutFor } from './team-layout';
 
 export type TeamDraft = {
   location: string;
   name: string;
   primaryColor: string;
   secondaryColor: string;
-  alignment: Alignment | null;
   coach: CoachDraft | null;
 };
 
@@ -52,7 +51,6 @@ export function findDraftProblem(size: LeagueSize, structure: StructureId, draft
     const secondary = parseHexColor(team.secondaryColor);
     if (!primary || !secondary) return 'invalid color';
     if (primary === secondary) return 'same colors';
-    if (team.alignment !== '4-3' && team.alignment !== '3-4') return 'missing alignment';
     if (!team.coach || !isCoachComplete(team.coach)) return 'incomplete coach';
     if (!validateCoachName(team.coach.name).ok) return 'invalid coach name';
     if (hasDuplicateCoachName(coachNames, team.coach.name)) return 'duplicate coach name';

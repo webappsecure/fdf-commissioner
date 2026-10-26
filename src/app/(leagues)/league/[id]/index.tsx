@@ -66,7 +66,7 @@ function TeamsSection({ league }: { league: League }) {
                 <ColorSwatch color={team.primaryColor} />
                 <ColorSwatch color={team.secondaryColor} />
                 <ThemedText style={styles.teamName}>
-                  {team.location} {team.name} ({team.alignment})
+                  {team.location} {team.name}
                 </ThemedText>
               </View>
               <ThemedText type="small" themeColor="textSecondary">

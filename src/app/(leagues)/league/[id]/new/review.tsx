@@ -37,7 +37,7 @@ export default function ReviewStep() {
 
   return (
     <WizardFrame
-      step={4}
+      step={3}
       backHref={`${base}/coaches`}
       blocked={problem ? { message: 'Finish the earlier steps before creating the teams.', href: base } : undefined}
       nextLabel={saving ? 'Creating...' : 'Create teams'}
@@ -65,7 +65,7 @@ export default function ReviewStep() {
                 <ColorSwatch color={team.primaryColor} />
                 <ColorSwatch color={team.secondaryColor} />
                 <ThemedText style={styles.titleText}>
-                  {team.location} {team.name} ({team.alignment})
+                  {team.location} {team.name}
                 </ThemedText>
               </View>
               <ThemedText type="small" themeColor="textSecondary">

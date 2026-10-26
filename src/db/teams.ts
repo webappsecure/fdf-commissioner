@@ -25,7 +25,6 @@ export type TeamWithCoach = {
   name: string;
   primaryColor: string;
   secondaryColor: string;
-  alignment: '4-3' | '3-4';
   divisionId: number | null;
   divisionName: string | null;
   conferenceName: string | null;
@@ -44,7 +43,6 @@ type TeamRow = {
   name: string;
   primary_color: string;
   secondary_color: string;
-  alignment: '4-3' | '3-4';
   division_id: number | null;
   division_name: string | null;
   conference_name: string | null;
@@ -58,7 +56,7 @@ type TeamRow = {
 export async function listTeams(leagueId: number): Promise<TeamWithCoach[]> {
   const db = await getDatabase();
   const rows = await db.getAllAsync<TeamRow>(
-    `SELECT t.id, t.location, t.name, t.primary_color, t.secondary_color, t.alignment, t.division_id,
+    `SELECT t.id, t.location, t.name, t.primary_color, t.secondary_color, t.division_id,
             d.name AS division_name, c.name AS conference_name,
             h.name AS coach_name, h.age AS coach_age, h.focus AS coach_focus,
             h.specialty AS coach_specialty, h.game_day_quality AS coach_game_day
@@ -76,7 +74,6 @@ export async function listTeams(leagueId: number): Promise<TeamWithCoach[]> {
     name: row.name,
     primaryColor: row.primary_color,
     secondaryColor: row.secondary_color,
-    alignment: row.alignment,
     divisionId: row.division_id,
     divisionName: row.division_name,
     conferenceName: row.conference_name,
@@ -135,14 +132,13 @@ export async function createLeagueTeams(leagueId: number, draft: LeagueDraft) {
       );
       const coachId = coachResult.lastInsertRowId;
       const teamResult = await db.runAsync(
-        `INSERT INTO teams (league_id, location, name, primary_color, secondary_color, alignment, division_id, conference_id, head_coach_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO teams (league_id, location, name, primary_color, secondary_color, division_id, conference_id, head_coach_id)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         leagueId,
         team.location,
         team.name,
         team.primaryColor,
         team.secondaryColor,
-        team.alignment,
         team.divisionIndex ? divisionIds[team.divisionIndex - 1] : null,
         team.conferenceIndex ? conferenceIds[team.conferenceIndex - 1] : null,
         coachId,

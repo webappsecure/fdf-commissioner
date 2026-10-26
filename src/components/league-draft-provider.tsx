@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import type { League } from '@/db/leagues';
 import type { CoachDraft } from '@/leagues/coach-draft';
 import { newLeagueDraft, type LeagueDraft, type TeamDraft } from '@/leagues/league-draft';
-import { layoutFor, type Alignment, type TeamLayout } from '@/leagues/team-layout';
+import { layoutFor, type TeamLayout } from '@/leagues/team-layout';
 
 type DraftContext = {
   league: League;
@@ -13,8 +13,6 @@ type DraftContext = {
   dirty: boolean;
   setTeam: (slot: number, team: TeamDraft) => void;
   setGroupName: (kind: 'conference' | 'division', index: number, name: string) => void;
-  setAlignment: (slot: number, alignment: Alignment) => void;
-  setAlignments: (alignments: Alignment[]) => void;
   setCoach: (slot: number, coach: CoachDraft) => void;
   setCoaches: (coaches: CoachDraft[]) => void;
 };
@@ -34,7 +32,7 @@ export function LeagueDraftProvider({ league, children }: { league: League; chil
     setDraft((current) => ({
       ...current,
       teams: current.teams.map((existing, index) =>
-        index === slot ? { ...team, alignment: existing?.alignment ?? team.alignment, coach: existing?.coach ?? team.coach } : existing,
+        index === slot ? { ...team, coach: existing?.coach ?? team.coach } : existing,
       ),
     }));
   }, []);
@@ -43,15 +41,6 @@ export function LeagueDraftProvider({ league, children }: { league: League; chil
       const key = kind === 'conference' ? 'conferenceNames' : 'divisionNames';
       return { ...current, [key]: current[key].map((existing, position) => (position === index ? name : existing)) };
     });
-  }, []);
-  const setAlignment = useCallback((slot: number, alignment: Alignment) => {
-    setDraft((current) => withTeam(current, slot, (team) => ({ ...team, alignment })));
-  }, []);
-  const setAlignments = useCallback((alignments: Alignment[]) => {
-    setDraft((current) => ({
-      ...current,
-      teams: current.teams.map((team, index) => (team ? { ...team, alignment: alignments[index] ?? team.alignment } : team)),
-    }));
   }, []);
   const setCoach = useCallback((slot: number, coach: CoachDraft) => {
     setDraft((current) => withTeam(current, slot, (team) => ({ ...team, coach })));
@@ -71,12 +60,10 @@ export function LeagueDraftProvider({ league, children }: { league: League; chil
       dirty: draft.teams.some((team) => team !== null),
       setTeam,
       setGroupName,
-      setAlignment,
-      setAlignments,
       setCoach,
       setCoaches,
     }),
-    [league, layout, draft, setTeam, setGroupName, setAlignment, setAlignments, setCoach, setCoaches],
+    [league, layout, draft, setTeam, setGroupName, setCoach, setCoaches],
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

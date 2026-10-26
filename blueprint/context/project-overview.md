@@ -1,6 +1,6 @@
 # FDF Commissioner - Project Overview
 
-<!-- blueprint:source-hash a7819687fd9ae3ac4cd627870d36dd35a01d3de84139b6a3fd1cd2aefc67bfba -->
+<!-- blueprint:source-hash 2d176297ca89618931ac99d3edcb0ab5d8cc4d44a0885157bff1a6d988876e9f -->
 
 > A local-first Expo app that runs Fast Drive Football (FDF) leagues for a single commissioner using the Commissioner Expansion rules: creation, team cards, scores, standings, and the full offseason.
 
@@ -28,8 +28,8 @@ Build-plan order. Headline feature: the league creation wizard and offseason wiz
 1. **App shell and local storage** - navigation, light and dark themes, responsive layouts, SQLite on iOS and Android.
 2. **Rules engine and dice** - base-6 2d6 rolls (11 to 66), table lookup, manual override, roll log, unit tests.
 3. **League management** - add, edit, delete (with confirmation), settings, supported sizes and structures.
-4. **League creation wizard** - size, structure, teams, coin-flip alignment, coaches, generated names.
-5. **Roster creation** - roll the 25 starters, kickers, returners, and fixed backups.
+4. **League creation wizard** - size, structure, teams, coaches, generated names.
+5. **Roster creation** - flip each team's alignment behind the scenes, then roll the 25 starters, kickers, returners, and fixed backups.
 6. **Team qualities and team view** - scoring and prevention qualities, tendency, quality combination.
 7. **Team cards** - printable primary and secondary cards from the author's template.
 8. **Schedules and season setup** - schedule templates per size and structure.
@@ -87,7 +87,7 @@ All in SQLite. IDs are local integer or UUID keys. Shapes below are the plan's c
 ### Team
 
 - `id`, `leagueId`, `name`, `location`, `primaryColor`, `secondaryColor`
-- `alignment` (enum: 4-3, 3-4), `divisionId` and `conferenceId` (nullable)
+- `alignment` (enum: 4-3, 3-4; unset until roster creation flips it), `divisionId` and `conferenceId` (nullable)
 - `headCoachId`
 
 ### Coach

@@ -185,7 +185,7 @@ per size and structure.
 
 - **Roster:** 25 starters per team: 1 QB, 1 RB, 3 WR, 1 TE, 5 OL, 3 or 4 DL,
   3 or 4 LB, 2 CB, 2 S, 1 PR, 1 KR, 1 K. There are no punters.
-- **Alignment:** a coin flip decides 4-3 or 3-4 at creation. A 4-3 team has 2 DT,
+- **Alignment:** a coin flip decides 4-3 or 3-4 during roster creation, behind the scenes. A 4-3 team has 2 DT,
   2 DE and 3 LB. A 3-4 team has 1 DT, 2 DE and 4 LB. Alignment may change in the
   offseason (to be confirmed).
 - **Creation:** each player gets an age, a Pass/Run rating (or A-D grade for K,

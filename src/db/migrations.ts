@@ -57,4 +57,21 @@ export const migrations: readonly string[] = [
     game_day_quality TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'active'
   );`,
+  // Alignment moves to roster creation (feature 5), so it is unset for new teams. SQLite cannot drop NOT NULL in place.
+  `CREATE TABLE teams_new (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    league_id INTEGER NOT NULL,
+    location TEXT NOT NULL,
+    name TEXT NOT NULL,
+    primary_color TEXT NOT NULL,
+    secondary_color TEXT NOT NULL,
+    alignment TEXT,
+    division_id INTEGER,
+    conference_id INTEGER,
+    head_coach_id INTEGER
+  );
+  INSERT INTO teams_new (id, league_id, location, name, primary_color, secondary_color, alignment, division_id, conference_id, head_coach_id)
+    SELECT id, league_id, location, name, primary_color, secondary_color, alignment, division_id, conference_id, head_coach_id FROM teams;
+  DROP TABLE teams;
+  ALTER TABLE teams_new RENAME TO teams;`,
 ];

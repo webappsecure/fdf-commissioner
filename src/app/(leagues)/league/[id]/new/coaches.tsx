@@ -14,7 +14,7 @@ export default function CoachesStep() {
   const router = useRouter();
   const { league, draft, setCoaches } = useLeagueDraft();
   const base = `/league/${league.id}/new` as const;
-  const aligned = draft.teams.every((team) => team?.alignment);
+  const teamsDone = draft.teams.every((team) => team !== null);
   const coachNames = draft.teams.map((team) => team?.coach?.name ?? '');
   const allReady = draft.teams.every((team, index) => team?.coach && !coachProblem(team.coach, coachNames, index));
   const anyRolled = draft.teams.some((team) => team?.coach);
@@ -31,9 +31,9 @@ export default function CoachesStep() {
 
   return (
     <WizardFrame
-      step={3}
-      backHref={`${base}/alignment`}
-      blocked={aligned ? undefined : { message: "Set every team's alignment first.", href: `${base}/alignment` }}
+      step={2}
+      backHref={base}
+      blocked={teamsDone ? undefined : { message: 'Enter every team first.', href: base }}
       nextDisabled={!allReady}
       onNext={() => router.push(`${base}/review`)}>
       <ThemedText themeColor="textSecondary">

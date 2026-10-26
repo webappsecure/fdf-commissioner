@@ -3,7 +3,7 @@ import type { RollResult } from '@/rules/roll';
 
 import type { LeagueDraft } from './league-draft';
 import type { LeagueSize, StructureId } from './structures';
-import { layoutFor, type Alignment } from './team-layout';
+import { layoutFor } from './team-layout';
 
 export type PlannedRoll = {
   step: 'coach-age' | 'coach-focus' | 'coach-specialty' | 'coach-game-day';
@@ -19,7 +19,6 @@ export type PlannedTeam = {
   name: string;
   primaryColor: string;
   secondaryColor: string;
-  alignment: Alignment;
   coach: { name: string; age: number; focus: CoachFocus; specialty: CoachSpecialty; gameDayQuality: GameDayQuality };
   rolls: PlannedRoll[];
 };
@@ -51,7 +50,6 @@ export function planLeagueRows(size: LeagueSize, structure: StructureId, draft: 
         name: team.name.trim(),
         primaryColor: team.primaryColor.toUpperCase(),
         secondaryColor: team.secondaryColor.toUpperCase(),
-        alignment: team.alignment!,
         coach: {
           name: coach.name.trim(),
           age: coach.age!.outcome!,

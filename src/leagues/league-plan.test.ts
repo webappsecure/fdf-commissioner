@@ -13,7 +13,6 @@ function filledDraft(size: LeagueSize, structure: StructureId): LeagueDraft {
       name: `Team ${index}`,
       primaryColor: '#c62828',
       secondaryColor: '#FFFFFF',
-      alignment: index % 2 === 0 ? '4-3' : '3-4',
       coach: rollWholeCoach(COACH_NAMES[index], () => 0.5),
     })),
   };
@@ -72,7 +71,6 @@ describe('planLeagueRows', () => {
     const team = plan.teams[0];
     expect(team.location).toBe('City 0');
     expect(team.primaryColor).toBe('#C62828');
-    expect(team.alignment).toBe('4-3');
     expect(team.coach.name).toBe(COACH_NAMES[0]);
     expect(team.rolls.map((entry) => entry.step)).toEqual(['coach-age', 'coach-focus', 'coach-specialty', 'coach-game-day']);
     expect(team.rolls[0].roll.outcome).toBe(team.coach.age);
