@@ -40,4 +40,13 @@ describe('migrations', () => {
     expect(keep).toContain("INSERT INTO sqlite_sequence (name, seq)");
     expect(keep).toContain("NOT EXISTS (SELECT 1 FROM sqlite_sequence WHERE name = 'teams')");
   });
+
+  it('adds players with a name that is unique per league ignoring case', () => {
+    const players = migrations[9];
+    expect(players).toContain('CREATE TABLE players');
+    expect(players).toContain('pass_rating INTEGER,');
+    expect(players).toContain('grade TEXT,');
+    expect(players).toContain("qualities TEXT NOT NULL DEFAULT '[]'");
+    expect(players).toContain('CREATE UNIQUE INDEX players_league_name ON players (league_id, name COLLATE NOCASE)');
+  });
 });

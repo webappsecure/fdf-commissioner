@@ -80,4 +80,20 @@ export const migrations: readonly string[] = [
   INSERT INTO sqlite_sequence (name, seq)
     SELECT 'teams', COALESCE((SELECT MAX(CAST(json_extract(context, '$.teamId') AS INTEGER)) FROM roll_log WHERE context IS NOT NULL AND json_valid(context)), 0)
     WHERE COALESCE((SELECT MAX(CAST(json_extract(context, '$.teamId') AS INTEGER)) FROM roll_log WHERE context IS NOT NULL AND json_valid(context)), 0) > 0 AND NOT EXISTS (SELECT 1 FROM sqlite_sequence WHERE name = 'teams');`,
+  // Feature 5b: starters and, later, free agents. Names are unique per league ignoring ASCII case, like league names.
+  `CREATE TABLE players (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    league_id INTEGER NOT NULL,
+    team_id INTEGER,
+    name TEXT NOT NULL,
+    position TEXT NOT NULL,
+    slot TEXT,
+    age INTEGER NOT NULL,
+    pass_rating INTEGER,
+    run_rating INTEGER,
+    grade TEXT,
+    qualities TEXT NOT NULL DEFAULT '[]',
+    status TEXT NOT NULL DEFAULT 'active'
+  );
+  CREATE UNIQUE INDEX players_league_name ON players (league_id, name COLLATE NOCASE);`,
 ];

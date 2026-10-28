@@ -94,10 +94,17 @@ export function rollPlayerQuality(draft: PlayerDraft, options: RollOptions = {})
   });
 }
 
+/** True when every roll the position needs has been made and found a result (a roll's outcome can be null). */
 export function isPlayerComplete(draft: PlayerDraft) {
-  if (!draft.age) return false;
-  if (isGradedPosition(draft.position)) return !!draft.grade;
-  return !!draft.rating && !!draft.qualityCount && draft.qualityRolls.length === draft.qualityCount.outcome;
+  if (draft.age?.outcome == null) return false;
+  if (isGradedPosition(draft.position)) return draft.grade?.outcome != null;
+  const count = draft.qualityCount?.outcome;
+  return (
+    draft.rating?.outcome != null &&
+    count != null &&
+    draft.qualityRolls.length === count &&
+    draft.qualityRolls.every((roll) => roll.outcome != null)
+  );
 }
 
 /** Rolls a whole player with dice, in the guide's order. */

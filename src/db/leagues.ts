@@ -116,6 +116,7 @@ export async function deleteLeague(id: number) {
   const db = await getDatabase();
   // Children first, in one transaction, so a failure cannot leave a league without its teams.
   await db.withTransactionAsync(async () => {
+    await db.runAsync('DELETE FROM players WHERE league_id = ?', id);
     await db.runAsync('DELETE FROM coaches WHERE league_id = ?', id);
     await db.runAsync('DELETE FROM teams WHERE league_id = ?', id);
     await db.runAsync('DELETE FROM divisions WHERE league_id = ?', id);

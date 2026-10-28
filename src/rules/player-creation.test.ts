@@ -178,6 +178,20 @@ describe('player steps', () => {
     expect(isPlayerComplete(draft)).toBe(false);
   });
 
+  it('is not complete when a roll found no result', () => {
+    const draft = build('QB', [rollPlayerAge, '11'], [rollPlayerRating, '61'], [rollPlayerQualityCount, '11']);
+    expect(isPlayerComplete(draft)).toBe(true);
+    expect(isPlayerComplete({ ...draft, age: { ...draft.age!, outcome: null } })).toBe(false);
+    expect(isPlayerComplete({ ...draft, rating: { ...draft.rating!, outcome: null } })).toBe(false);
+    expect(isPlayerComplete({ ...draft, qualityCount: { ...draft.qualityCount!, outcome: null } })).toBe(false);
+    const kicker = build('K', [rollPlayerAge, '11'], [rollPlayerRating, '64']);
+    expect(isPlayerComplete(kicker)).toBe(true);
+    expect(isPlayerComplete({ ...kicker, grade: { ...kicker.grade!, outcome: null } })).toBe(false);
+    const withQuality = build('WR', [rollPlayerAge, '11'], [rollPlayerRating, '32'], [rollPlayerQualityCount, '63'], [rollPlayerQuality, '13']);
+    expect(isPlayerComplete(withQuality)).toBe(true);
+    expect(isPlayerComplete({ ...withQuality, qualityRolls: [{ ...withQuality.qualityRolls[0], outcome: null }] })).toBe(false);
+  });
+
   it('lists the rolls in guide order', () => {
     const draft = build('QB', [rollPlayerAge, '11'], [rollPlayerRating, '61'], [rollPlayerQualityCount, '62'], [rollPlayerQuality, '64'], [rollPlayerQuality, '11']);
     expect(playerRolls(draft).map((entry) => entry.step)).toEqual(['age', 'rating', 'quality-count', 'quality', 'quality']);
