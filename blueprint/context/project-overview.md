@@ -1,6 +1,6 @@
 # FDF Commissioner - Project Overview
 
-<!-- blueprint:source-hash 24f4ae82e53d1bb0daee301ed3aba40acbfb4e52088e07dd59d676962f93130e -->
+<!-- blueprint:source-hash 26b9661504b8ddb956f74099c05eb3f9ce7e89b22e53a384f2edd906a48cc718 -->
 
 > A local-first Expo app that runs Fast Drive Football (FDF) leagues for a single commissioner using the Commissioner Expansion rules: creation, team cards, scores, standings, and the full offseason.
 
