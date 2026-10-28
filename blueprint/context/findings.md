@@ -46,11 +46,3 @@
 **Why it matters:** The target is iPad and Android tablets, but `app.json` sets `orientation` to `portrait` and has no `ios.supportsTablet`. In Expo Go this has little effect, but a standalone or development build would run in a phone-sized compatibility window on iPad and lock to portrait. Not confirmed on a device; nothing has been built outside Expo Go.
 **Suggested fix:** When a tablet-first layout is wanted, set `orientation` to `default` and `ios.supportsTablet` to `true`, then check the screens in landscape. This changes shipped behavior, so it needs the user's decision.
 **Resolution:** Set `orientation` to `default` and `ios.supportsTablet` to `true` in `app.json`, per the user's decision to assume tablet-first. Landscape layouts are unchanged and still to be checked by hand on the tablet. Needs `/audit` to close.
-
-### F-34 [P3] open - Migration 8 can reuse the ids of deleted teams
-
-**File:** src/db/migrations.ts:73
-**Found:** 2026-10-25 by /audit independent (scope: current; lens: quality)
-**Why it matters:** `teams` is AUTOINCREMENT, so SQLite keeps its highest-ever id in `sqlite_sequence`. The rebuild copies rows into `teams_new` with explicit ids, which sets the new counter to the highest id still present, not the old counter. Run against a scratch database (teams 1 to 3, team 3 deleted, then the migration SQL, then an insert), the new team got id 3 again, where before the rebuild it would have been 4. Roll-log rows keep `teamId` in their `context` JSON after a league is deleted (`deleteLeague` does not touch `roll_log`), so a reused id could make an old roll entry point at an unrelated new team. Nothing reads `teamId` from the roll log today, so there is no visible effect yet. Existing data and ids of surviving rows are copied exactly.
-**Suggested fix:** After the copy and before the rename, carry the counter over, for example `UPDATE sqlite_sequence SET seq = (SELECT seq FROM sqlite_sequence WHERE name = 'teams') WHERE name = 'teams_new';` placed before `DROP TABLE teams;`, with a matching line in the migration test. Only worth doing if a later feature reads team ids from the roll log; otherwise it can be accepted.
-**Resolution:**

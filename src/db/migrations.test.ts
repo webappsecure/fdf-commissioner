@@ -31,4 +31,13 @@ describe('migrations', () => {
     expect(rebuild).toContain('DROP TABLE teams;');
     expect(rebuild).toContain('ALTER TABLE teams_new RENAME TO teams;');
   });
+
+  it('keeps the teams id counter above every team id the roll log mentions', () => {
+    const keep = migrations[8];
+    expect(keep).toContain("UPDATE sqlite_sequence SET seq = MAX(seq,");
+    expect(keep).toContain("json_extract(context, '$.teamId')");
+    expect(keep).toContain('json_valid(context)');
+    expect(keep).toContain("INSERT INTO sqlite_sequence (name, seq)");
+    expect(keep).toContain("NOT EXISTS (SELECT 1 FROM sqlite_sequence WHERE name = 'teams')");
+  });
 });

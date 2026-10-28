@@ -74,4 +74,10 @@ export const migrations: readonly string[] = [
     SELECT id, league_id, location, name, primary_color, secondary_color, alignment, division_id, conference_id, head_coach_id FROM teams;
   DROP TABLE teams;
   ALTER TABLE teams_new RENAME TO teams;`,
+  // Migration 8 reset the teams id counter to the highest id still present, so a deleted team's id could be reused.
+  // Roll-log rows still name those ids in their context, so keep the counter above every id they mention.
+  `UPDATE sqlite_sequence SET seq = MAX(seq, COALESCE((SELECT MAX(CAST(json_extract(context, '$.teamId') AS INTEGER)) FROM roll_log WHERE context IS NOT NULL AND json_valid(context)), 0)) WHERE name = 'teams';
+  INSERT INTO sqlite_sequence (name, seq)
+    SELECT 'teams', COALESCE((SELECT MAX(CAST(json_extract(context, '$.teamId') AS INTEGER)) FROM roll_log WHERE context IS NOT NULL AND json_valid(context)), 0)
+    WHERE COALESCE((SELECT MAX(CAST(json_extract(context, '$.teamId') AS INTEGER)) FROM roll_log WHERE context IS NOT NULL AND json_valid(context)), 0) > 0 AND NOT EXISTS (SELECT 1 FROM sqlite_sequence WHERE name = 'teams');`,
 ];
