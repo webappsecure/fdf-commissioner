@@ -16,6 +16,9 @@ Scaffolding the app is already done. Start with the first real slice.
 - [x] 3. **League management** - add, edit, and delete leagues (with confirmation), league settings, supported sizes and structures
 - [x] 4. **League creation wizard** - size and structure, teams (name, location, colors), coaches, generated names from the provided list
 - [ ] 5. **Roster creation** - flip each team's 4-3 or 3-4 alignment behind the scenes, then roll the 25 starters, kickers and returners, and the backup rules, using the guide's creation tables
+  - [x] 5a. **Player creation tables and logic** - every position's age, rating or grade, quality-count, and quality tables from guide section 4.1 as typed data, with the pure creation steps (full quality on a repeat, opposites cancel) and unit tests
+  - [ ] 5b. **Player storage and roster planning** - players table, unique player names from the provided list, the alignment coin flip (stored alignments are kept), the 25-starter roster planner, and an atomic save that logs every roll
+  - [ ] 5c. **Roster creation flow** - league-home entry point, roll team by team with preview and manual override, review, and a minimal team roster view
 - [ ] 6. **Team qualities and team view** - team scoring and prevention qualities, tendency, player and coach quality combination, team screens with minimal scrolling
 
 ## Milestone 3: Cards
