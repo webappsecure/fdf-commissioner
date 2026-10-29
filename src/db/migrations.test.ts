@@ -49,4 +49,12 @@ describe('migrations', () => {
     expect(players).toContain("qualities TEXT NOT NULL DEFAULT '[]'");
     expect(players).toContain('CREATE UNIQUE INDEX players_league_name ON players (league_id, name COLLATE NOCASE)');
   });
+
+  it('adds the special teams columns to players', () => {
+    const special = migrations[10];
+    expect(special).toContain('ALTER TABLE players ADD COLUMN electric TEXT;');
+    expect(special).toContain('ALTER TABLE players ADD COLUMN fg_range INTEGER;');
+    expect(special).toContain('ALTER TABLE players ADD COLUMN xp_range INTEGER;');
+    expect(special).not.toContain('NOT NULL');
+  });
 });

@@ -19,7 +19,7 @@ Scaffolding the app is already done. Start with the first real slice.
   - [x] 5a. **Player creation tables and logic** - every position's age, rating or grade, quality-count, and quality tables from guide section 4.1 as typed data, with the pure creation steps (full quality on a repeat, opposites cancel) and unit tests
   - [x] 5b. **Player storage and roster planning** - players table, unique player names from the provided list, the alignment coin flip (stored alignments are kept), the 25-starter roster planner, and an atomic save that logs every roll
   - [x] 5c. **Roster creation flow** - league-home entry point, roll team by team with a preview and a reroll of the whole team (no typed rolls), review, and a minimal team roster view
-- [ ] 6. **Team qualities and team view** - team scoring and prevention qualities, tendency, player and coach quality combination, team screens with minimal scrolling
+- [x] 6. **Team qualities and team view** - team scoring and prevention qualities, tendency, player and coach quality combination, team screens with minimal scrolling
 
 ## Milestone 3: Cards
 

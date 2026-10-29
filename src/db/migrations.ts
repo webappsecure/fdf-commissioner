@@ -96,4 +96,9 @@ export const migrations: readonly string[] = [
     status TEXT NOT NULL DEFAULT 'active'
   );
   CREATE UNIQUE INDEX players_league_name ON players (league_id, name COLLATE NOCASE);`,
+  // Special teams rolls (guide 5.3): ELECTRIC for KR and PR ('none', 'semi', 'full'), and the top of the 11-NN FG and XP
+  // success ranges for K. NULL for other positions and for rosters saved before this migration.
+  `ALTER TABLE players ADD COLUMN electric TEXT;
+  ALTER TABLE players ADD COLUMN fg_range INTEGER;
+  ALTER TABLE players ADD COLUMN xp_range INTEGER;`,
 ];

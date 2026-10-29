@@ -6,6 +6,9 @@ import {
   playerRolls,
   rollPlayerAge,
   rollPlayerQuality,
+  rollPlayerElectric,
+  rollPlayerExtraPoint,
+  rollPlayerFieldGoal,
   rollPlayerQualityCount,
   rollPlayerRating,
   type PlayerDraft,
@@ -91,7 +94,9 @@ describe('createPlayer', () => {
       expect(draft.age?.outcome).toBeGreaterThanOrEqual(22);
       const steps = playerRolls(draft).map((entry) => entry.step);
       if (isGradedPosition(position)) {
-        expect(steps).toEqual(['age', 'grade']);
+        expect(steps).toEqual(position === 'K' ? ['age', 'grade', 'field-goal', 'extra-point'] : ['age', 'grade', 'electric']);
+        expect(draft.electric !== null).toBe(position !== 'K');
+        expect(draft.fieldGoal !== null).toBe(position === 'K');
         expect(draft.rating).toBeNull();
         expect(draft.qualityCount).toBeNull();
         expect(draft.qualities).toEqual([]);
@@ -127,6 +132,43 @@ describe('createPlayer', () => {
     const draft = createPlayer('WR', dice(1, 1, 6, 6, 6, 6, 1, 4, 3, 1));
     expect(draft.qualityRolls.map((roll) => roll.outcome)).toEqual([semi('shaky'), semi('reliable')]);
     expect(draft.qualities).toEqual([]);
+  });
+});
+
+describe('special teams rolls', () => {
+  it('rolls ELECTRIC by the returner grade', () => {
+    // grade 64 = A; ELECTRIC A: 11 none, 22 semi, 42 full
+    const graded = build('PR', [rollPlayerRating, '64']);
+    for (const [roll, outcome] of [['11', 'none'], ['22', 'semi'], ['42', 'full']] as const) {
+      const result = rollPlayerElectric(graded, { manual: roll });
+      expect(result.ok && result.draft.electric?.outcome).toBe(outcome);
+    }
+  });
+
+  it('rolls the kicker FG and XP ranges by grade', () => {
+    const kicker = build('K', [rollPlayerRating, '11']); // grade D
+    const fg = rollPlayerFieldGoal(kicker, { manual: '12' });
+    expect(fg.ok && fg.draft.fieldGoal).toMatchObject({ outcome: 51, table: 'Kicker FG range (Grade D)' });
+    const xp = rollPlayerExtraPoint(kicker, { manual: '26' });
+    expect(xp.ok && xp.draft.extraPoint?.outcome).toBe(61);
+  });
+
+  it('does nothing without a grade or for another position', () => {
+    const bare = createPlayerDraft('K');
+    expect(rollPlayerFieldGoal(bare, { manual: '11' })).toEqual({ ok: true, draft: bare });
+    const qb = createPlayerDraft('QB');
+    expect(rollPlayerElectric(qb, { manual: '11' })).toEqual({ ok: true, draft: qb });
+    const kr = build('KR', [rollPlayerRating, '64']);
+    expect(rollPlayerFieldGoal(kr, { manual: '11' })).toEqual({ ok: true, draft: kr });
+    expect(rollPlayerExtraPoint(kr, { manual: '11' })).toEqual({ ok: true, draft: kr });
+    expect(rollPlayerElectric(build('K', [rollPlayerRating, '64']), { manual: '11' }).ok).toBe(true);
+  });
+
+  it('clears the special teams rolls when the grade is rolled again', () => {
+    const kicker = build('K', [rollPlayerRating, '64'], [rollPlayerFieldGoal, '11'], [rollPlayerExtraPoint, '11']);
+    const again = rollPlayerRating(kicker, { manual: '11' });
+    expect(again.ok && again.draft.fieldGoal).toBeNull();
+    expect(again.ok && again.draft.extraPoint).toBeNull();
   });
 });
 
@@ -184,9 +226,14 @@ describe('player steps', () => {
     expect(isPlayerComplete({ ...draft, age: { ...draft.age!, outcome: null } })).toBe(false);
     expect(isPlayerComplete({ ...draft, rating: { ...draft.rating!, outcome: null } })).toBe(false);
     expect(isPlayerComplete({ ...draft, qualityCount: { ...draft.qualityCount!, outcome: null } })).toBe(false);
-    const kicker = build('K', [rollPlayerAge, '11'], [rollPlayerRating, '64']);
+    const kicker = build('K', [rollPlayerAge, '11'], [rollPlayerRating, '64'], [rollPlayerFieldGoal, '11'], [rollPlayerExtraPoint, '11']);
     expect(isPlayerComplete(kicker)).toBe(true);
     expect(isPlayerComplete({ ...kicker, grade: { ...kicker.grade!, outcome: null } })).toBe(false);
+    expect(isPlayerComplete({ ...kicker, fieldGoal: { ...kicker.fieldGoal!, outcome: null } })).toBe(false);
+    expect(isPlayerComplete({ ...kicker, extraPoint: null })).toBe(false);
+    const returner = build('KR', [rollPlayerAge, '11'], [rollPlayerRating, '64'], [rollPlayerElectric, '11']);
+    expect(isPlayerComplete(returner)).toBe(true);
+    expect(isPlayerComplete({ ...returner, electric: null })).toBe(false);
     const withQuality = build('WR', [rollPlayerAge, '11'], [rollPlayerRating, '32'], [rollPlayerQualityCount, '63'], [rollPlayerQuality, '13']);
     expect(isPlayerComplete(withQuality)).toBe(true);
     expect(isPlayerComplete({ ...withQuality, qualityRolls: [{ ...withQuality.qualityRolls[0], outcome: null }] })).toBe(false);
