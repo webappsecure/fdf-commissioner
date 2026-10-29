@@ -1,6 +1,6 @@
 # FDF Commissioner - Project Overview
 
-<!-- blueprint:source-hash 26b9661504b8ddb956f74099c05eb3f9ce7e89b22e53a384f2edd906a48cc718 -->
+<!-- blueprint:source-hash 30b46233eb31e00566957faa4fb1c90d35a1eb06f2a8f22a00afb18a65b335a3 -->
 
 > A local-first Expo app that runs Fast Drive Football (FDF) leagues for a single commissioner using the Commissioner Expansion rules: creation, team cards, scores, standings, and the full offseason.
 
@@ -44,7 +44,8 @@ Build-plan order. Headline feature: the league creation wizard and offseason wiz
 17. **Relegation links** - same-sized flat leagues in a straight chain, promotion and relegation step.
 18. **History** - past seasons, champions, standings, careers.
 19. **Export and import** - league backup files and moving between devices.
-20. **Release polish** - README, license and attribution, run and install docs for Expo Go.
+20. **UI polish and roster reroll rework** - rework the team cards and other screens for a consistent, compact look, and rework how and when a team can be rerolled.
+21. **Release polish** - README, license and attribution, run and install docs for Expo Go.
 
 ## Rules summary
 

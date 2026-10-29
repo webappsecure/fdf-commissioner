@@ -48,4 +48,5 @@ Scaffolding the app is already done. Start with the first real slice.
 
 ## Milestone 7: Release
 
-- [ ] 20. **Release polish** - README, license and rules-author attribution, run and install docs for Expo Go
+- [ ] 20. **UI polish and roster reroll rework** - rework the team cards (Offense, Defense, Special teams) and the other screens for a consistent, compact look, and rework how and when a team can be rerolled
+- [ ] 21. **Release polish** - README, license and rules-author attribution, run and install docs for Expo Go
