@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ActionButton } from '@/components/action-button';
 import { InfoRow } from '@/components/info-row';
@@ -55,25 +55,40 @@ function TeamsSection({ league }: { league: League }) {
       </>
     );
   }
+  const rostered = state.teams.some((team) => team.playerCount > 0);
   return (
     <View style={styles.rows}>
+      {!rostered && <ActionButton label="Create rosters" variant="primary" onPress={() => router.push(`/league/${league.id}/rosters`)} />}
       {groupTeams(state.teams).map((group) => (
         <View key={group.key} style={styles.rows}>
           {group.heading && <ThemedText type="smallBold">{group.heading}</ThemedText>}
-          {group.teams.map((team) => (
-            <ThemedView key={team.id} type="backgroundElement" style={styles.team}>
-              <View style={styles.teamTitle}>
-                <ColorSwatch color={team.primaryColor} />
-                <ColorSwatch color={team.secondaryColor} />
-                <ThemedText style={styles.teamName}>
-                  {team.location} {team.name}
+          {group.teams.map((team) => {
+            const card = (
+              <ThemedView type="backgroundElement" style={styles.team}>
+                <View style={styles.teamTitle}>
+                  <ColorSwatch color={team.primaryColor} />
+                  <ColorSwatch color={team.secondaryColor} />
+                  <ThemedText style={styles.teamName}>
+                    {team.location} {team.name}
+                  </ThemedText>
+                </View>
+                <ThemedText type="small" themeColor="textSecondary">
+                  {team.coach.name}: {summarizeCoach(team.coach.age, team.coach.focus, team.coach.specialty, team.coach.gameDayQuality)}
                 </ThemedText>
-              </View>
-              <ThemedText type="small" themeColor="textSecondary">
-                {team.coach.name}: {summarizeCoach(team.coach.age, team.coach.focus, team.coach.specialty, team.coach.gameDayQuality)}
-              </ThemedText>
-            </ThemedView>
-          ))}
+              </ThemedView>
+            );
+            return rostered ? (
+              <Pressable
+                key={team.id}
+                accessibilityRole="button"
+                accessibilityLabel={`${team.location} ${team.name} roster`}
+                onPress={() => router.push(`/league/${league.id}/team/${team.id}`)}>
+                {card}
+              </Pressable>
+            ) : (
+              <View key={team.id}>{card}</View>
+            );
+          })}
         </View>
       ))}
     </View>
@@ -114,7 +129,7 @@ function LeagueHome({ league }: { league: League }) {
       {confirming ? (
         <ThemedView type="backgroundElement" style={styles.confirm}>
           <ThemedText type="smallBold">Delete {league.name}?</ThemedText>
-          <ThemedText themeColor="textSecondary">This permanently removes the league and its teams and cannot be undone.</ThemedText>
+          <ThemedText themeColor="textSecondary">This permanently removes the league, its teams and its rosters and cannot be undone.</ThemedText>
           {deleteFailed && (
             <ThemedText accessibilityRole="alert" style={styles.error}>
               The league could not be deleted. Try again.

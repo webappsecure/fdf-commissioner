@@ -28,6 +28,7 @@ export type TeamWithCoach = {
   divisionId: number | null;
   divisionName: string | null;
   conferenceName: string | null;
+  playerCount: number;
   coach: {
     name: string;
     age: number;
@@ -46,6 +47,7 @@ type TeamRow = {
   division_id: number | null;
   division_name: string | null;
   conference_name: string | null;
+  player_count: number;
   coach_name: string;
   coach_age: number;
   coach_focus: CoachFocus;
@@ -58,6 +60,7 @@ export async function listTeams(leagueId: number): Promise<TeamWithCoach[]> {
   const rows = await db.getAllAsync<TeamRow>(
     `SELECT t.id, t.location, t.name, t.primary_color, t.secondary_color, t.division_id,
             d.name AS division_name, c.name AS conference_name,
+            (SELECT COUNT(*) FROM players p WHERE p.team_id = t.id) AS player_count,
             h.name AS coach_name, h.age AS coach_age, h.focus AS coach_focus,
             h.specialty AS coach_specialty, h.game_day_quality AS coach_game_day
      FROM teams t
@@ -77,6 +80,7 @@ export async function listTeams(leagueId: number): Promise<TeamWithCoach[]> {
     divisionId: row.division_id,
     divisionName: row.division_name,
     conferenceName: row.conference_name,
+    playerCount: row.player_count,
     coach: {
       name: row.coach_name,
       age: row.coach_age,
